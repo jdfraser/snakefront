@@ -22,6 +22,18 @@ def start():
 		'taunt': 'Online bookings for less!'
 	})
 
+def simulate(state):
+	#modify state
+	pass
+
+def gen_heatmap(movedata):
+	state = movedata.clone()
+	heatmap = []
+	height = len(state['board'][0])
+	for x in range(len(state['board']):
+		heatmap.append([1]*height)
+	simulate(state)
+
 
 @bottle.post('/move')
 def move():
