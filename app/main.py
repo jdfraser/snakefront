@@ -69,22 +69,19 @@ def move():
 	print "end heatmap"
 
 	for snake in data['snakes']:
-		if snake['name'] in name:
+		if snake['name'] == ourSnakeName:
 			head = snake['coords'][0]
 
-	for x,y in [[0,1],[0,-1],[1,0],[-1,0]]:
-		movepos = [x + head[0], y + head[1]]
-		if heatmap[movepos[0]][movepos[1]] == 1:
-			move = movepos
-	
-	if movepos[0] > head[0]:
-		nextmove = 'right'
-	elif movepos[0] < head[0]:
-		nextmove = 'left'
-	elif movepos[1] > head[1]:
+	#move = getpath()
+	move = [head[0] +1, head[1]]
+	if move[1] > head[1]:
 		nextmove = 'down'
-	elif movepos[1] < head[1]:
+	elif move[1] < head[1]:
 		nextmove = 'up'
+	elif move[0] > head[0]:
+		nextmove = 'right'
+	elif move[0] < head[0]:
+		nextmove = 'left'
 
 	return json.dumps({
 		'move': nextmove,
