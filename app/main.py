@@ -62,13 +62,13 @@ def move():
 
 	nextmove = 'left'
 
-	print "heatmap"
+	text = "heatmap:\n"
 	heatmap = gen_heatmap(data)
 	for y in range(len(heatmap[0])):
 		for xs in heatmap:
-			print str(xs[y]) + ",",
-		print ""
-	print "end heatmap"
+			text += str(xs[y]) + ", "
+		text += "\n"
+	print text, "end heatmap"
 
 	return json.dumps({
 		'move': nextmove,
