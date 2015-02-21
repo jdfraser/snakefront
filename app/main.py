@@ -27,31 +27,65 @@ def simulate(state):
 	#modify state
 	pass
 
-def gen_heatmap(movedata):
-	global ourSnakeName
-	state = copy.deepcopy(movedata)
+def print_heatmap(heatmap):
+	text = "heatmap:\n"
+	for y in range(len(heatmap[0])):
+		for xs in heatmap:
+			text += str(xs[y]) + ", "
+		text += "\n"
+	print text, "end heatmap"
+
+def default_heatmap(width, height):
 	heatmap = []
-	width = len(state['board'])
-	height = len(state['board'][0])
 	for x in range(width):
 		heatmap.append([1]*height)
-	
-	snakeOptions = {}
-	for snake in state['snakes']:
-		if snake['name'] != ourSnakeName:
-			headpos = snake['coords'][0]
-			neckpos = snake['coords'][1]
-			for x,y in [[0,1],[0,-1],[1,0],[-1,0]]:
-				movepos = [x + headpos[0], y + headpos[1]]
-				if movepos[0] == neckpos[0] and movepos[1] == neckpos[1]: continue # Assume snake won't go backwards
-				snakeOptions.setdefault(snake['name'], []).append(movepos)
-		# todo: what if they ate food?
-		snake['coords'].pop()
-		for x,y in snake['coords']:
-			heatmap[x][y] += 100
-		for x,y in snakeOptions.get(snake['name'], []):
-			heatmap[x][y] += 33 #repeating of course
 	return heatmap
+
+def fractal_heat(data, coord, neck, depth, factor):
+	if depth == 0: return
+	for x,y in [[0,1],[0,-1],[1,0],[-1,0]]:
+		if [x + coord[0], y + coord[1]] == neck: continue # not backwards
+		data[x+coord[0]][y + coord[1]] += factor
+		fractal_heat(data, [x+coord[0], y+coord[1]], coord, depth-1, factor/3)
+
+def gen_heatmap(movedata):
+	global name
+	state = copy.deepcopy(movedata)
+	width = len(state['board'])
+	height = len(state['board'][0])
+	final = default_heatmap(width, height)
+
+	for turn in range(4):
+		heatmap = default_heatmap(width, height)
+		snakes = copy.deepcopy(state['snakes'])
+		oursnake = None
+		oursnakeHead = [0,0]
+		for snake in snakes:
+			coords = snake['coords']
+			if snake['name'] != name:
+				headpos = coords[0]
+				# parse heat around the head
+				fractal_heat(heatmap, headpos, coords[1], turn+1, 33.0)
+			else:
+				oursnake = snake
+				oursnakeHead = snake['coords'][0]
+			# todo: what if they ate food?
+			# Now parse the body
+			try: 
+				for i in range(turn+1): coords.pop()
+			except IndexError: pass
+			for x,y in snake['coords']:
+				heatmap[x][y] += 100	
+		#ring = []
+		#for x in range(-(turn+1), (turn+1)+1):
+		#	for y in range(-(turn+1), (turn+1)+1):
+		#		if (x + y) == (turn+1): ring.append([x + oursnakeHead,y + oursnakeHead]) # add any combination thats distance == our turn #
+		for x, col in enumerate(heatmap):
+			for y, heat in enumerate(col):
+				#if heat != 1 and ((x-oursnakeHead[0]) + (y-oursnakeHead[1])) == (turn+1): 
+				final[x][y] += heat
+
+	return final
 
 
 @bottle.post('/move')
@@ -61,6 +95,7 @@ def move():
 	# <snakedata>: [{'url':'http://...', 'color': '#ffffff', 'headurl': 'http://....png', 'name': 'badsnake', 'taunt': 'Hey'}]
 	# Do things here!!
 
+
 	text = "heatmap:\n"
 	heatmap = gen_heatmap(data)
 	for y in range(len(heatmap[0])):
@@ -68,12 +103,14 @@ def move():
 			text += str(xs[y]) + ", "
 		text += "\n"
 	print text, "end heatmap"
-	nextmove = ShortestPath(heatmap, headpos, [0,0])
-	print "Recommend next move to " + str(next_move)
-
+	
 	for snake in data['snakes']:
 		if snake['name'] == name:
 			head = snake['coords'][0]
+	move = ShortestPath(heatmap, head, [0,0])
+	#move = [0,0]
+	print "Recommend next move to " + str(move)
+
 
 	#move = getpath()
 	move = [head[0] +1, head[1]]
@@ -85,7 +122,10 @@ def move():
 		nextmove = 'right'
 	elif move[0] < head[0]:
 		nextmove = 'left'
-
+	else: 
+		print "UHHHH wat are you trying to move to yourself??"
+		nextmove = 'left'
+	
 	return json.dumps({
 		'move': nextmove,
 		'taunt': 'Booking in progress'
