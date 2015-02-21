@@ -9,14 +9,14 @@ def index():
 			gonna leave this default for now, don't want people spying :D
 		</a>
 	"""
-
+ourSnakeName = 'Snakefront-test'
 
 @bottle.post('/start')
 def start():
 	data = bottle.request.json
 
 	return json.dumps({
-		'name': 'Snakefront-test',
+		'name': ourSnakeName,
 		'color': '#1E90FF',
 		'head_url': 'http://snakefront.herokuapp.com',
 		'taunt': 'Online bookings for less!'
@@ -27,26 +27,28 @@ def simulate(state):
 	pass
 
 def gen_heatmap(movedata):
+	global ourSnakeName
 	state = copy.deepcopy(movedata)
 	heatmap = []
+	width = len(state['board'])
 	height = len(state['board'][0])
-	for x in range(len(state['board'])):
+	for x in range(width):
 		heatmap.append([1]*height)
-	simulate(state)
 	
 	snakeOptions = {}
 	for snake in state['snakes']:
-		headpos = snake['coords'][0]
-		neckpos = snake['coords'][1]
-		for x,y in [[0,1],[0,-1],[1,0],[-1,0]]:
-			movepos = [x + headpos[0], y + headpos[1]]
-			if movepos[0] == neckpos[0] and movepos[1] == neckpos[1]: continue # Assume snake won't go backwards
-			snakeOptions.setdefault(snake['name'], []).append(movepos)
+		if snake['name'] != ourSnakeName:
+			headpos = snake['coords'][0]
+			neckpos = snake['coords'][1]
+			for x,y in [[0,1],[0,-1],[1,0],[-1,0]]:
+				movepos = [x + headpos[0], y + headpos[1]]
+				if movepos[0] == neckpos[0] and movepos[1] == neckpos[1]: continue # Assume snake won't go backwards
+				snakeOptions.setdefault(snake['name'], []).append(movepos)
 		# todo: what if they ate food?
 		snake['coords'].pop()
 		for x,y in snake['coords']:
 			heatmap[x][y] += 100
-		for x,y in snakeOptions[snake['name']]:
+		for x,y in snakeOptions.get(snake['name'], []):
 			heatmap[x][y] += 33 #repeating of course
 	return heatmap
 
