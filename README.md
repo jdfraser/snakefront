@@ -1,3 +1,12 @@
+
+
+
+
+
+
+
+Note: This is all copied from the main repo
+
 ## battlesnake-python
 
 A simple [BattleSnake AI](http://battlesnake.io) written in Python. Available live at [battlesnake-python.herokuapp.com](http://battlesnake-python.herokuapp.com).
