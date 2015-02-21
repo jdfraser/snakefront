@@ -1,6 +1,6 @@
 import bottle
 import json
-
+import copy
 
 @bottle.get('/')
 def index():
@@ -16,7 +16,7 @@ def start():
 	data = bottle.request.json
 
 	return json.dumps({
-		'name': 'Snakefront',
+		'name': 'Snakefront-test',
 		'color': '#1E90FF',
 		'head_url': 'http://snakefront.herokuapp.com',
 		'taunt': 'Online bookings for less!'
@@ -27,12 +27,28 @@ def simulate(state):
 	pass
 
 def gen_heatmap(movedata):
-	state = movedata.clone()
+	state = copy.deepcopy(movedata)
 	heatmap = []
 	height = len(state['board'][0])
-	for x in range(len(state['board']):
+	for x in range(len(state['board'])):
 		heatmap.append([1]*height)
 	simulate(state)
+	
+	snakeOptions = {}
+	for snake in state['snakes']:
+		headpos = snake['coords'][0]
+		neckpos = snake['coords'][1]
+		for x,y in [[0,1],[0,-1],[1,0],[-1,0]]:
+			movepos = [x + headpos[0], y + headpos[1]]
+			if movepos[0] == neckpos[0] and movepos[1] == neckpos[1]: continue # Assume snake won't go backwards
+			snakeOptions.setdefault(snake['name'], []).append(movepos)
+		# todo: what if they ate food?
+		snake['coords'].pop()
+		for x,y in snake['coords']:
+			heatmap[x][y] += 100
+		for x,y in snakeOptions[snake['name']]:
+			heatmap[x][y] += 33 #repeating of course
+	return heatmap
 
 
 @bottle.post('/move')
@@ -44,6 +60,13 @@ def move():
 
 	nextmove = 'left'
 
+	print "heatmap"
+	heatmap = gen_heatmap(data)
+	for y in range(len(heatmap[0])):
+		for xs in heatmap:
+			print str(xs[y]) + ",",
+		print ""
+	print "end heatmap"
 
 	return json.dumps({
 		'move': nextmove,
