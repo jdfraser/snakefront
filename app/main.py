@@ -2,6 +2,8 @@ import bottle
 import json
 import copy
 
+name = 'Snakefront-test'
+
 @bottle.get('/')
 def index():
 	return """
@@ -16,7 +18,7 @@ def start():
 	data = bottle.request.json
 
 	return json.dumps({
-		'name': 'Snakefront-test',
+		'name': name,
 		'color': '#1E90FF',
 		'head_url': 'http://snakefront.herokuapp.com',
 		'taunt': 'Online bookings for less!'
@@ -58,8 +60,6 @@ def move():
 	# <snakedata>: [{'url':'http://...', 'color': '#ffffff', 'headurl': 'http://....png', 'name': 'badsnake', 'taunt': 'Hey'}]
 	# Do things here!!
 
-	nextmove = 'left'
-
 	print "heatmap"
 	heatmap = gen_heatmap(data)
 	for y in range(len(heatmap[0])):
@@ -67,6 +67,24 @@ def move():
 			print str(xs[y]) + ",",
 		print ""
 	print "end heatmap"
+
+	for snake in data['snakes']:
+		if snake['name'] in name:
+			head = snake['coords'][0]
+
+	for x,y in [[0,1],[0,-1],[1,0],[-1,0]]:
+		movepos = [x + head[0], y + head[1]]
+		if heatmap[movepos[0]][movepos[1]] == 1:
+			move = movepos
+	
+	if movepos[0] > head[0]:
+		nextmove = 'right'
+	elif movepos[0] < head[0]:
+		nextmove = 'left'
+	elif movepos[1] > head[1]:
+		nextmove = 'down'
+	elif movepos[1] < head[1]:
+		nextmove = 'up'
 
 	return json.dumps({
 		'move': nextmove,
