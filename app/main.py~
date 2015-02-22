@@ -47,16 +47,16 @@ def move():
 	shortest = []
 	move = [0,0]
 	for snack in data['food']:
-		next, full_shortest_path = ShortestPath(heatmap, head, snack)
+		nextcoord, full_shortest_path = ShortestPath(heatmap, head, snack)
+		print full_shortest_path, nextcoord
 		if shortest == [] or len(full_shortest_path) < len(shortest):
 			shortest = full_shortest_path
-			move = next
-		
+			move = nextcoord
+	if (sum(shortest)/len(shortest) > 10):
+		print "There seems to be no reasonably safe path to food."
+		move = [0,0]
 	print "Recommend next move to " + str(move)
 
-
-	#move = getpath()
-	move = [head[0] +1, head[1]]
 	if move[1] > head[1]:
 		nextmove = 'down'
 	elif move[1] < head[1]:

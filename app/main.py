@@ -52,9 +52,6 @@ def move():
 		if shortest == [] or len(full_shortest_path) < len(shortest):
 			shortest = full_shortest_path
 			move = nextcoord
-	if (sum(shortest)/len(shortest) > 10):
-		print "There seems to be no reasonably safe path to food."
-		move = [0,0]
 	print "Recommend next move to " + str(move)
 
 	if move[1] > head[1]:
