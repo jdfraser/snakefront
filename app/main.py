@@ -47,10 +47,11 @@ def move():
 	shortest = []
 	move = [0,0]
 	for snack in data['food']:
-		next, full_shortest_path = ShortestPath(heatmap, head, snack)
+		nextcoord, full_shortest_path = ShortestPath(heatmap, head, snack)
+		print full_shortest_path, nextcoord
 		if shortest == [] or len(full_shortest_path) < len(shortest):
 			shortest = full_shortest_path
-			move = next
+			move = nextcoord
 		
 	print "Recommend next move to " + str(move)
 
