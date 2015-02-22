@@ -69,7 +69,7 @@ def move():
 	print "end heatmap"
 
 	for snake in data['snakes']:
-		if snake['name'] == ourSnakeName:
+		if snake['name'] == name:
 			head = snake['coords'][0]
 
 	#move = getpath()
