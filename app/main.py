@@ -111,9 +111,6 @@ def move():
 	#move = [0,0]
 	print "Recommend next move to " + str(move)
 
-
-	#move = getpath()
-	move = [head[0] +1, head[1]]
 	if move[1] > head[1]:
 		nextmove = 'down'
 	elif move[1] < head[1]:
