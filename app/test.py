@@ -7,12 +7,13 @@ import heatmap as hm
 
 
 data = {'snakes': [
-	{'name': 'boop', 'coords': [[14,7],[14,6],[14,5]]},
-	{'name': 'test', 'coords': [[5,6],[5,7],[5,8]]}
+	{'name': 'Snakefront-test', 'coords': [[4,5],[4,6],[4,7]]},
+	{'name': 'boop', 'coords': [[14,7],[14,6],[14,5],[14,4]]},
+	{'name': 'test', 'coords': [[5,6],[5,7],[5,8],[6,8],[7,8]]}
 ], 'board': []}
 data['board'] = [[0]*20]*20
 
-heatmap = hm.gen_heatmap(data)
+heatmap = hm.gen_heatmap(data, userings=False)
 hm.print_heatmap(heatmap)
 
 
