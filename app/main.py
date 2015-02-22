@@ -6,6 +6,9 @@ from heatmap import print_heatmap, gen_heatmap
 
 name = 'Snakefront'
 
+def neighbours(c):
+	return [[c[0]+1,c[1]],[c[0]-1,c[1]],[c[0],c[1]+1],[c[0],c[1]-1]]
+
 @bottle.get('/')
 def index():
 	return """
@@ -39,10 +42,11 @@ def move():
 			text += str(xs[y]) + ", "
 		text += "\n"
 	print text, "end heatmap"
-	
+	oursnake = None
 	for snake in data['snakes']:
 		if snake['name'] == name:
 			head = snake['coords'][0]
+			oursnake = snake
 
 	shortest = []
 	move = [0,0]
@@ -53,7 +57,31 @@ def move():
 			shortest = full_shortest_path
 			move = nextcoord
 	print "Recommend next move to " + str(move)
-
+	taunt = "Booking in progress"
+	try: #this was done at 6:20pm okay I was scared
+		for snake in data['snakes']:
+			if snake['name'] != name and move in neighbours(snake['coords'][0]):
+				taunt = "Get booked!"
+				if len(snake['coords']) >= len(oursnake['coords']):
+					#ahh they're bigger run away
+					taunt = "RUN"
+					if move[1] > head[1]:
+						move[1] = head[1]
+						move[0] = head[0] - 1
+					elif move[1] < head[1]:
+						move[1] = head[1]
+						move[0] = head[0] + 1
+					elif move[0] < head[0]:
+						move[0] = head[0]
+						move[1] = head[1] + 1
+					elif move[0] > head[0]:
+						move[0] = head[0]
+						move[1] = head[1] - 1
+				break
+	except Exception: 
+		pass	
+	if move in oursnake['coords']:
+		return json.dumps({})
 	if move[1] > head[1]:
 		nextmove = 'down'
 	elif move[1] < head[1]:
@@ -65,10 +93,10 @@ def move():
 	else: 
 		print "UHHHH wat are you trying to move to yourself??"
 		nextmove = 'left'
-	
+
 	return json.dumps({
 		'move': nextmove,
-		'taunt': 'Booking in progress'
+		'taunt': taunt
 	})
 
 
