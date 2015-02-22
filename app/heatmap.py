@@ -18,16 +18,19 @@ def fractal_heat(data, coord, neck, depth, factor):
 	if depth == 0: return
 	for x,y in [[0,1],[0,-1],[1,0],[-1,0]]:
 		if [x + coord[0], y + coord[1]] == neck: continue # not backwards
-		data[x+coord[0]][y + coord[1]] += factor
+		try:
+			data[x+coord[0]][y + coord[1]] += factor
+		except IndexError:
+			continue
 		fractal_heat(data, [x+coord[0], y+coord[1]], coord, depth-1, factor/3)
 
-def gen_heatmap(movedata, name='Snakefront-test'):
+def gen_heatmap(movedata, name='Snakefront-test', maxturns=7, userings=True):
 	state = copy.deepcopy(movedata)
 	width = len(state['board'])
 	height = len(state['board'][0])
 	final = default_heatmap(width, height)
 
-	for turn in range(4):
+	for turn in range(1, maxturns):
 		heatmap = default_heatmap(width, height)
 		snakes = copy.deepcopy(state['snakes'])
 		oursnake = None
@@ -37,25 +40,22 @@ def gen_heatmap(movedata, name='Snakefront-test'):
 			if snake['name'] != name:
 				headpos = coords[0]
 				# parse heat around the head
-				fractal_heat(heatmap, headpos, coords[1], turn+1, 33.0)
+				fractal_heat(heatmap, headpos, coords[1], turn, 33.0)
 			else:
 				oursnake = snake
 				oursnakeHead = snake['coords'][0]
 			# todo: what if they ate food?
 			# Now parse the body
 			try: 
-				for i in range(turn+1): coords.pop()
+				for i in range(turn): coords.pop()
 			except IndexError: pass
 			for x,y in snake['coords']:
-				heatmap[x][y] += 100	
-		#ring = []
-		#for x in range(-(turn+1), (turn+1)+1):
-		#	for y in range(-(turn+1), (turn+1)+1):
-		#		if (x + y) == (turn+1): ring.append([x + oursnakeHead,y + oursnakeHead]) # add any combination thats distance == our turn #
+				heatmap[x][y] += 10000
 		for x, col in enumerate(heatmap):
 			for y, heat in enumerate(col):
-				#if heat != 1 and ((x-oursnakeHead[0]) + (y-oursnakeHead[1])) == (turn+1): 
-				final[x][y] += heat
+				if heat != 1:
+					if not userings or (((x-oursnakeHead[0]) + (y-oursnakeHead[1])) == turn): 
+						final[x][y] += heat
 
 	return final
 
