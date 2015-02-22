@@ -3,6 +3,8 @@ import json
 import copy
 from pathfinding import ShortestPath
 
+name = 'Snakefront-test'
+
 @bottle.get('/')
 def index():
 	return """
@@ -10,14 +12,12 @@ def index():
 			gonna leave this default for now, don't want people spying :D
 		</a>
 	"""
-ourSnakeName = 'Snakefront-test'
-
 @bottle.post('/start')
 def start():
 	data = bottle.request.json
 
 	return json.dumps({
-		'name': ourSnakeName,
+		'name': name,
 		'color': '#1E90FF',
 		'head_url': 'https://github.com/Nebual/snakefront/blob/master/snake.png?raw=true',
 		'taunt': 'Online bookings for less!'
@@ -61,8 +61,6 @@ def move():
 	# <snakedata>: [{'url':'http://...', 'color': '#ffffff', 'headurl': 'http://....png', 'name': 'badsnake', 'taunt': 'Hey'}]
 	# Do things here!!
 
-	nextmove = 'left'
-
 	text = "heatmap:\n"
 	heatmap = gen_heatmap(data)
 	for y in range(len(heatmap[0])):
@@ -70,8 +68,23 @@ def move():
 			text += str(xs[y]) + ", "
 		text += "\n"
 	print text, "end heatmap"
-	next_move = ShortestPath(heatmap, headpos, [0,0])
+	nextmove = ShortestPath(heatmap, headpos, [0,0])
 	print "Recommend next move to " + str(next_move)
+
+	for snake in data['snakes']:
+		if snake['name'] == name:
+			head = snake['coords'][0]
+
+	#move = getpath()
+	move = [head[0] +1, head[1]]
+	if move[1] > head[1]:
+		nextmove = 'down'
+	elif move[1] < head[1]:
+		nextmove = 'up'
+	elif move[0] > head[0]:
+		nextmove = 'right'
+	elif move[0] < head[0]:
+		nextmove = 'left'
 
 	return json.dumps({
 		'move': nextmove,
