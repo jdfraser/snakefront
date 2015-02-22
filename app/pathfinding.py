@@ -39,6 +39,9 @@ def ShortestPath(HeatMap, HeadPos, Target):
 
 	Path = nx.shortest_path(G, source = HeadPos[0]*Height+HeadPos[1], target=Target[0]*Height+Target[1], weight='weight')
 	#print Path
+	if (sum(Path) / len(Path) > 15):
+		print "There seems to be no safe way to the food"
+		return ShortestPath(HeatMap, HeadPos, [0,0])
 	return [Path[1] // Height, Path[1] % Height], Path
 			
 
