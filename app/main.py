@@ -4,7 +4,7 @@ import copy
 from pathfinding import ShortestPath
 from heatmap import print_heatmap, gen_heatmap
 
-name = 'Snakefront-test'
+name = 'Snakefront'
 
 @bottle.get('/')
 def index():

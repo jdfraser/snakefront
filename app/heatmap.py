@@ -29,12 +29,11 @@ def gen_heatmap(movedata, name='Snakefront-test', maxturns=7, userings=True):
 	width = len(state['board'])
 	height = len(state['board'][0])
 	final = default_heatmap(width, height)
-
+	oursnakeHead = [0,0]
+	oursnakeNeck = [0,0]
 	for turn in range(1, maxturns):
 		heatmap = default_heatmap(width, height)
 		snakes = copy.deepcopy(state['snakes'])
-		oursnake = None
-		oursnakeHead = [0,0]
 		for snake in snakes:
 			coords = snake['coords']
 			if snake['name'] != name:
@@ -42,7 +41,7 @@ def gen_heatmap(movedata, name='Snakefront-test', maxturns=7, userings=True):
 				# parse heat around the head
 				fractal_heat(heatmap, headpos, coords[1], turn, 33.0)
 			else:
-				oursnake = snake
+				oursnakeNeck = snake['coords'][1]
 				oursnakeHead = snake['coords'][0]
 			# todo: what if they ate food?
 			# Now parse the body
@@ -56,6 +55,8 @@ def gen_heatmap(movedata, name='Snakefront-test', maxturns=7, userings=True):
 				if heat != 1:
 					if not userings or (((x-oursnakeHead[0]) + (y-oursnakeHead[1])) == turn): 
 						final[x][y] += heat
+		final[oursnakeHead[0]][oursnakeHead[1]] = 99999
+		final[oursnakeNeck[0]][oursnakeNeck[1]] = 99999
 
 	return final
 
