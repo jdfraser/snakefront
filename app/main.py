@@ -43,8 +43,15 @@ def move():
 	for snake in data['snakes']:
 		if snake['name'] == name:
 			head = snake['coords'][0]
-	move = ShortestPath(heatmap, head, [0,0])
-	#move = [0,0]
+
+	shortest = []
+	move = [0,0]
+	for snack in data['food']:
+		next, full_shortest_path = ShortestPath(heatmap, head, snack)
+		if shortest == [] or len(full_shortest_path) < len(shortest):
+			shortest = full_shortest_path
+			move = next
+		
 	print "Recommend next move to " + str(move)
 
 
