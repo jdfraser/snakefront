@@ -38,10 +38,15 @@ def shortest_path(HeatMap, HeadPos, Target):
 			G[cur][next]['weight'] = weight
 
 	Path = nx.shortest_path(G, source = HeadPos[0]*Height+HeadPos[1], target=Target[0]*Height+Target[1], weight='weight')
-	#print Path
-	return [Path[1] // Height, Path[1] % Height], Path
+	print Path
+	print "Edges: "
+	print G.edges()
+	weight = 0
+	for i in range(0, len(Path)-1):
+		weight += G[Path[i]][Path[i+1]]['weight'] #Get weight of move
+	return [Path[1] // Height, Path[1] % Height], Path, weight
 			
 
 
 
-#print ShortestPath([[0, 5], [1, 2], [3, 3]], [0,0], [2,1])
+print shortest_path([[0, 5], [1, 2], [3, 3]], [0,0], [2,1])
