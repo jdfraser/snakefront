@@ -60,4 +60,8 @@ def gen_heatmap(requestdata, our_id='2ca1ab89-620c-4fbe-b876-179013470205', maxt
 		final[oursnakeHead[0]][oursnakeHead[1]] = 9998
 		final[oursnakeNeck[0]][oursnakeNeck[1]] = 9998
 
+	if 'walls' in state:
+		for x,y in state['walls']:
+			final[x][y] = 9997
+
 	return final
