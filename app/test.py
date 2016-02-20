@@ -13,10 +13,9 @@ data = {'snakes': [
 ], 'board': []}
 data['board'] = [[0]*20]*20
 
-heatmap = hm.gen_heatmap(data, userings=False)
+heatmap = hm.gen_heatmap(data, use_rings=False)
 hm.print_heatmap(heatmap)
 
 
 
 print "k"
-
