@@ -42,8 +42,6 @@ def start():
 @bottle.post('/move')
 def move():
 	data = bottle.request.json
-
-	state = get_state()
 	heatmap = gen_heatmap(data, snake_id)
 	print_heatmap(heatmap)
 
@@ -57,7 +55,7 @@ def move():
 	move = [0,0]
 	taunt = "Booking in progress"
 
-	move = get_move()
+	move = get_move(data, head, heatmap)
 
 	if move in oursnake['coords']:
 		pass #TODO: WTF DON'T MOVE INTO OURSELF!!
@@ -67,9 +65,12 @@ def move():
 		'taunt': 'battlesnake-python!'
 	}
 
-def get_move():
+def get_move(data, head, heatmap):
 	# try different algorithms and pick our favourite one 
-	return food(data, head, heatmap)
+	idle_move = idle(data, head, heatmap)
+	food_move = food(data, head, heatmap)
+	return food_move
+#	return food(data, head, heatmap)
 
 def food(data, head, heatmap):
 	shortest = []
@@ -82,7 +83,15 @@ def food(data, head, heatmap):
 	return move
 
 def idle(data, head, heatmap):
-	return [0, 0]
+	oursnake = []
+	for snake in data['snakes']:
+		if snake['id'] == snake_id:
+			oursnake = snake['coords']
+	if(len(oursnake) == 0):
+		return False #didn't find our snake, bail
+	target = oursnake[-1]
+	move, full_shortest_path = shortest_path(heatmap, head, target)
+	return move
 
 def get_direction_from_target_headpos(head, move):
 	if move[1] > head[1]:
