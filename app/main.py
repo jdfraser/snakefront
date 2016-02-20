@@ -57,12 +57,7 @@ def move():
 	move = [0,0]
 	taunt = "Booking in progress"
 
-	if state == 'food':
-		move = get_food(data, head, heatmap)
-	elif state == 'aggressive':
-		pass
-	elif state == 'idle':
-		pass
+	move = get_move()
 
 	if move in oursnake['coords']:
 		pass #TODO: WTF DON'T MOVE INTO OURSELF!!
@@ -72,19 +67,22 @@ def move():
 		'taunt': 'battlesnake-python!'
 	}
 
-def get_state():
-	return 'food'
+def get_move():
+	# try different algorithms and pick our favourite one 
+	return food(data, head, heatmap)
 
-def get_food(data, head, heatmap):
+def food(data, head, heatmap):
 	shortest = []
 	for snack in data['food']:
 		nextcoord, full_shortest_path = shortest_path(heatmap, head, snack)
-		print full_shortest_path, nextcoord
 		if shortest == [] or len(full_shortest_path) < len(shortest):
 			shortest = full_shortest_path
 			move = nextcoord
 	print "Recommend next move to " + str(move)
 	return move
+
+def idle(data, head, heatmap):
+	return [0, 0]
 
 def get_direction_from_target_headpos(head, move):
 	if move[1] > head[1]:
