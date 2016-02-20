@@ -58,7 +58,7 @@ def move():
 	taunt = "Booking in progress"
 
 	if state == 'food':
-		get_food(data, head, heatmap)
+		move = get_food(data, head, heatmap)
 	elif state == 'aggressive':
 		pass
 	elif state == 'idle':
@@ -76,13 +76,15 @@ def get_state():
 	return 'food'
 
 def get_food(data, head, heatmap):
+	shortest = []
 	for snack in data['food']:
-		nextcoord, full_shortest_path = ShortestPath(heatmap, head, snack)
+		nextcoord, full_shortest_path = shortest_path(heatmap, head, snack)
 		print full_shortest_path, nextcoord
 		if shortest == [] or len(full_shortest_path) < len(shortest):
 			shortest = full_shortest_path
 			move = nextcoord
 	print "Recommend next move to " + str(move)
+	return move
 
 def get_direction_from_target_headpos(head, move):
 	if move[1] > head[1]:
