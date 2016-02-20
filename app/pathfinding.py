@@ -9,7 +9,7 @@ import networkx as nx
 #Target is the [column, row] of the target.
 
 #RETURNS a tuple: the position of our next move, the shortest path to the target
-def ShortestPath(HeatMap, HeadPos, Target):
+def shortest_path(HeatMap, HeadPos, Target):
 	Height = len(HeatMap[0])
 	Width = len(HeatMap)
 	G = nx.Graph()
