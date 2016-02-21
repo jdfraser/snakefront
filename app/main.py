@@ -7,6 +7,7 @@ from heatmap import print_heatmap, gen_heatmap
 
 name = 'Snakeoverflow'
 snake_id = '2ca1ab89-620c-4fbe-b876-179013470205'
+#snake_id = '99194a3a-985c-4423-9929-53235449f029' #delete-snake
 
 #retrieve and parse data from REST API
 @bottle.route('/static/<path:path>')
@@ -67,20 +68,25 @@ def move():
 
 def get_move(data, head, heatmap):
 	# try different algorithms and pick our favourite one 
-	idle_move = idle(data, head, heatmap)
-	food_move = food(data, head, heatmap)
-	return food_move
-#	return food(data, head, heatmap)
+	idle_move, idle_cost = idle(data, head, heatmap)
+	food_move, food_cost = food(data, head, heatmap)
+	if(idle_move == False):
+		return food_move
+	smallest_cost = min(idle_cost, food_cost)
+	if(idle_cost == smallest_cost):
+		return idle_move
+	elif(food_cost == smallest_cost):
+		return food_move
 
 def food(data, head, heatmap):
 	shortest = []
 	for snack in data['food']:
-		nextcoord, full_shortest_path = shortest_path(heatmap, head, snack)
+		nextcoord, full_shortest_path, cost = shortest_path(heatmap, head, snack)
 		if shortest == [] or len(full_shortest_path) < len(shortest):
 			shortest = full_shortest_path
 			move = nextcoord
 	print "Recommend next move to " + str(move)
-	return move
+	return move, cost
 
 def idle(data, head, heatmap):
 	oursnake = []
@@ -90,8 +96,11 @@ def idle(data, head, heatmap):
 	if(len(oursnake) == 0):
 		return False #didn't find our snake, bail
 	target = oursnake[-1]
-	move, full_shortest_path = shortest_path(heatmap, head, target)
-	return move
+	if(target == head):
+		return False, 99999
+
+	move, full_shortest_path, cost = shortest_path(heatmap, head, target)
+	return move, cost
 
 def get_direction_from_target_headpos(head, move):
 	if move[1] > head[1]:
