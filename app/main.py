@@ -65,10 +65,12 @@ def move():
 	if move in data['oursnake']['coords']:
 		pass #TODO: WTF DON'T MOVE INTO OURSELF!!
 
-	return {
-		'move': get_direction_from_target_headpos(data['ourhead'], move),
-		'taunt': taunt
+	response = {
+		'move': get_direction_from_target_headpos(data['ourhead'], move)
 	}
+	if random.randint(0, 10) == 0:
+		response['taunt'] = taunt
+	return response
 
 def get_move(data, head, heatmap, graph):
 	# try different algorithms and pick our favourite one
