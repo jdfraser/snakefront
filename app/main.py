@@ -110,7 +110,7 @@ def move_coin(data, head, heatmap, graph):
 		nextcoord = pathdata['nextPos']
 		full_shortest_path = pathdata['path']
 		cost = pathdata['cost']
-		min_coin_distance = (5 + data['oursnake'].get('gold', 0)*2) # Allow further distances as our bank account increases
+		min_coin_distance = (10 + data['oursnake'].get('gold', 0)*2) # Allow further distances as our bank account increases
 		if len(full_shortest_path) < min_coin_distance:
 			return nextcoord, cost
 	return False, 9995
@@ -146,10 +146,10 @@ def idle(data, head, heatmap, graph):
 	return move, cost
 
 def move_idle_dumb(data, head, heatmap, graph):
-	left_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0] - 1, head[1]])
-	right_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0] + 1, head[1]])
-	up_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0], head[1] - 1])
-	down_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0], head[1] + 1])
+	left_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [max(0, head[0] - 1), head[1]])
+	right_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [min(len(heatmap), head[0] + 1), head[1]])
+	up_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0], max(0, head[1] - 1)])
+	down_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0], min(len(heatmap[0]), head[1] + 1)])
 
 	smallest = min(left_pathdata['cost'], right_pathdata['cost'], up_pathdata['cost'], down_pathdata['cost'])
 	if smallest == left_pathdata['cost']:
