@@ -32,7 +32,7 @@ def index():
 def start():
 	data = bottle.request.json
 	rand = random.randint(0, 2)
-	taunts = ['µ▓▓╣█ ░░Þ¸¸éÅ', '0xFFFFFF', '0xA28F3C']
+	taunts = ['0xA9FF33', '0xFFFFFF', '0xA28F3C']
 	taunt = taunts[rand]
 	return {
 		'name': name,
