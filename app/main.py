@@ -80,7 +80,11 @@ def get_move(data, head, heatmap, graph):
 
 	if coin_cost < 50 and int(data['oursnake']['health']) > 25:
 		return coin_move
-	if(idle_move == False or food_cost < 100):
+	if(int(data['oursnake']['health']) < 25 and food_cost < 100):
+		return food_move
+	if(int(data['oursnake']['health']) < 50 and food_cost < 70):
+		return food_move
+	if(food_cost < 40):
 		return food_move
 	if(idle_cost < 100):
 		return idle_move
