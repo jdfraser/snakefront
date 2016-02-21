@@ -54,7 +54,10 @@ def move():
 
 	shortest = []
 	move = [0,0]
-	taunt = "Booking in progress"
+
+	rand = random.randint(0, 2)
+	taunts = ['0xA9FF33', '0xFFFFFF', '0xA28F3C']
+	taunt = taunts[rand]
 
 	move = get_move(data, data['ourhead'], heatmap, graph)
 
