@@ -76,7 +76,11 @@ def get_move(data, head, heatmap, graph):
 		return coin_move
 	if(idle_move == False or food_cost < 100):
 		return food_move
-	return idle_move
+	if(idle_cost < 100):
+		return idle_move
+
+	# Worst case scenario: Go 1 square in a direction that doesn't immediately kill it
+	return move_idle_dumb(data, head, heatmap, graph)
 
 def move_coin(data, head, heatmap, graph):
 	if 'gold' in data and len(data['gold']):
@@ -115,6 +119,22 @@ def idle(data, head, heatmap, graph):
 	move = pathdata['nextPos']
 	cost = pathdata['cost']
 	return move, cost
+
+def move_idle_dumb(data, head, heatmap, graph):
+	left_pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, [head[0] - 1, head[1]])
+	right_pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, [head[0] + 1, head[1]])
+	up_pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, [head[0], head[1] - 1])
+	down_pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, [head[0], head[1] + 1])
+
+	smallest = min(left_pathdata['cost'], right_pathdata['cost'], up_pathdata['cost'], down_pathdata['cost'])
+	if smallest == left_pathdata['cost']:
+		return left_pathdata['nextPos']
+	if smallest == right_pathdata['cost']:
+		return right_pathdata['nextPos']
+	if smallest == up_pathdata['cost']:
+		return up_pathdata['nextPos']
+	if smallest == down_pathdata['cost']:
+		return down_pathdata['nextPos']
 
 def get_direction_from_target_headpos(head, move):
 	if move[1] > head[1]:
