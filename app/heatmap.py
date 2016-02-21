@@ -4,7 +4,7 @@ def print_heatmap(heatmap):
 	text = "heatmap:\n"
 	for y in range(len(heatmap[0])):
 		for xs in heatmap:
-			text += "%3d, " % int(xs[y])
+			text += "%4d, " % min(int(xs[y]), 9999)
 		text += "\n"
 	print text, "end heatmap"
 
@@ -24,7 +24,7 @@ def fractal_heat(data, coord, neck, depth, factor):
 			continue
 		fractal_heat(data, [x+coord[0], y+coord[1]], coord, depth-1, factor/3)
 
-def gen_heatmap(requestdata, our_id='2ca1ab89-620c-4fbe-b876-179013470205', maxturns=7, userings=True):
+def gen_heatmap(requestdata, our_id='2ca1ab89-620c-4fbe-b876-179013470205', maxturns=7, userings=False):
 	state = copy.deepcopy(requestdata)
 	width = state['width']
 	height = state['height']
@@ -41,7 +41,7 @@ def gen_heatmap(requestdata, our_id='2ca1ab89-620c-4fbe-b876-179013470205', maxt
 		snakes = copy.deepcopy(state['snakes'])
 		for snake in snakes:
 			coords = snake['coords']
-			if snake['id'] != our_id and len(coords) >= oursnakeLength:
+			if snake['id'] != our_id: # and len(coords) >= oursnakeLength:
 				# parse heat around the head
 				fractal_heat(heatmap, coords[0], coords[1], turn, 33.0)
 			# todo: what if they ate food?
@@ -49,14 +49,14 @@ def gen_heatmap(requestdata, our_id='2ca1ab89-620c-4fbe-b876-179013470205', maxt
 			try:
 				for i in range(turn): coords.pop()
 			except IndexError: pass
-			for x,y in snake['coords']:
+			for x,y in coords:
 				heatmap[x][y] += 10000
 		for x, col in enumerate(heatmap):
 			for y, heat in enumerate(col):
 				if heat != 1:
 					if not userings or (((x-oursnakeHead[0]) + (y-oursnakeHead[1])) == turn):
 						final[x][y] += heat
-		final[oursnakeHead[0]][oursnakeHead[1]] = 99999
-		final[oursnakeNeck[0]][oursnakeNeck[1]] = 99999
+		final[oursnakeHead[0]][oursnakeHead[1]] = 9998
+		final[oursnakeNeck[0]][oursnakeNeck[1]] = 9998
 
 	return final
