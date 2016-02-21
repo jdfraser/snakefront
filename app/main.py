@@ -91,6 +91,7 @@ def food(data, head, heatmap, graph):
 	shortestHeat = 99999
 	for snack in data['food']:
 		pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, snack)
+		print pathdata
 		nextcoord = pathdata['nextPos']
 		full_shortest_path = pathdata['path']
 		heat = pathdata['cost']

@@ -42,6 +42,7 @@ def graphify(HeatMap):
 			print str(next) + " Add edge between [" + str(column) + "][" + str(row) + "] and [" + str(column+1) + "][" + str(row) + "], weight=" + str(weight)
 			G.add_edge(cur, next)
 			G[cur][next]['weight'] = weight
+	print G.edges()
 
 	return G
 
@@ -63,5 +64,5 @@ def cheapest_path(G, Height, HeadPos, TargetPos):
 
 
 
-#G = graphify([[0, 5], [1, 2], [3, 3]], [0,0], [2,1])
+G = graphify([[0, 5], [1, 2], [3, 3]])
 #print cheapest_path(G, [0,0], [2,1])
