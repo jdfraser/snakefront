@@ -43,43 +43,50 @@ def start():
 @bottle.post('/move')
 def move():
 	data = bottle.request.json
+
+	find_our_snake(data)
+
 	heatmap = gen_heatmap(data, snake_id)
 	graph = pathfinding.graphify(heatmap)
 	print_heatmap(heatmap)
-
-	oursnake = None
-	for snake in data['snakes']:
-		if snake['id'] == snake_id:
-			head = snake['coords'][0]
-			oursnake = snake
 
 	shortest = []
 	move = [0,0]
 	taunt = "Booking in progress"
 
-	move = get_move(data, head, heatmap, graph)
+	move = get_move(data, data['ourhead'], heatmap, graph)
 
-	if move in oursnake['coords']:
+	if move in data['oursnake']['coords']:
 		pass #TODO: WTF DON'T MOVE INTO OURSELF!!
 
 	return {
-		'move': get_direction_from_target_headpos(head, move),
-		'taunt': 'battlesnake-python!'
+		'move': get_direction_from_target_headpos(data['ourhead'], move),
+		'taunt': taunt
 	}
 
 def get_move(data, head, heatmap, graph):
-	# try different algorithms and pick our favourite one 
+	# try different algorithms and pick our favourite one
+
+	coin_move, coin_cost = move_coin(data, head, heatmap, graph)
 	idle_move, idle_cost = idle(data, head, heatmap, graph)
 	food_move, food_cost = food(data, head, heatmap, graph)
-	if(idle_move == False):
+
+	if coin_cost < 50 and int(data['oursnake']['health']) > 25:
+		return coin_move
+	if(idle_move == False or food_cost < 100):
 		return food_move
-	smallest_cost = min(idle_cost, food_cost)
-	if(idle_cost == smallest_cost):
-		return idle_move
-	elif(food_cost == smallest_cost):
-		return food_move
+	return idle_move
+
+def move_coin(data, head, heatmap, graph):
+	if 'gold' in data and len(data['gold']):
+		nextcoord, full_shortest_path, cost = pathfinding.cheapest_path(graph, len(heatmap[0]), head, data['gold'][0])
+		min_coin_distance = (5 + data['oursnake'].get('gold', 0)*2) # Allow further distances as our bank account increases
+		if len(full_shortest_path) < min_coin_distance:
+			return nextcoord, cost
+	return False, 9999
 
 def food(data, head, heatmap, graph):
+	move = [0,0]
 	shortest = []
 	shortestHeat = 99999
 	for snack in data['food']:
@@ -92,7 +99,7 @@ def food(data, head, heatmap, graph):
 			move = nextcoord
 			shortestHeat = heat
 	print "Recommend next move to " + str(move)
-	return move, shortestHeat 
+	return move, shortestHeat
 
 def idle(data, head, heatmap, graph):
 	oursnake = []
@@ -123,6 +130,14 @@ def get_direction_from_target_headpos(head, move):
 	    print "UHHHH wat are you trying to move to yourself??"
 	    nextmove = 'west'
 	return nextmove
+
+def find_our_snake(request_data):
+	request_data['oursnake'] = dict()
+	request_data['ourhead'] = [0, 0]
+	for snake in request_data['snakes']:
+		if snake['id'] == snake_id:
+			request_data['ourhead'] = snake['coords'][0]
+			request_data['oursnake'] = snake
 
 @bottle.post('/end')
 def end():

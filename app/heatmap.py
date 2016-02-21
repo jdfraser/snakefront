@@ -29,10 +29,8 @@ def gen_heatmap(requestdata, our_id='2ca1ab89-620c-4fbe-b876-179013470205', maxt
 	width = state['width']
 	height = state['height']
 	final = default_heatmap(width, height)
-	for snake in state['snakes']:
-		if snake['id'] == our_id:
-			oursnake = snake
-			break
+
+	oursnake = state['oursnake']
 	oursnakeHead = oursnake['coords'][0]
 	oursnakeNeck = oursnake['coords'][1]
 	oursnakeLength = len(oursnake['coords'])
@@ -46,10 +44,13 @@ def gen_heatmap(requestdata, our_id='2ca1ab89-620c-4fbe-b876-179013470205', maxt
 				we_are_bigger = (len(coords) < oursnakeLength)
 				fractal_heat(heatmap, coords[0], coords[1], turn - we_are_bigger, (turn == 1 and 100 or 33.0))
 			# todo: what if they ate food?
+
 			# Now parse the body
 			try:
+				# Remove tail components that will move by the time we reach them
 				for i in range(turn): coords.pop()
 			except IndexError: pass
+
 			for x,y in coords:
 				heatmap[x][y] += 8000
 		for x, col in enumerate(heatmap):
