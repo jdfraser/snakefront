@@ -80,11 +80,13 @@ def get_move(data, head, heatmap):
 
 def food(data, head, heatmap):
 	shortest = []
+	shortestHeat = 99999
 	for snack in data['food']:
-		nextcoord, full_shortest_path, cost = shortest_path(heatmap, head, snack)
-		if shortest == [] or len(full_shortest_path) < len(shortest):
+		nextcoord, full_shortest_path, heat = shortest_path(heatmap, head, snack)
+		if heat < shortestHeat:
 			shortest = full_shortest_path
 			move = nextcoord
+			shortestHeat = heat
 	print "Recommend next move to " + str(move)
 	return move, cost
 
