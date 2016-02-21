@@ -6,8 +6,8 @@ import pathfinding
 from heatmap import print_heatmap, gen_heatmap
 
 name = 'Snakeoverflow'
-snake_id = '2ca1ab89-620c-4fbe-b876-179013470205'
-#snake_id = '99194a3a-985c-4423-9929-53235449f029' #delete-snake
+#snake_id = '2ca1ab89-620c-4fbe-b876-179013470205'
+snake_id = '99194a3a-985c-4423-9929-53235449f029' #delete-snake
 
 #retrieve and parse data from REST API
 @bottle.route('/static/<path:path>')
@@ -31,12 +31,14 @@ def index():
 @bottle.post('/start')
 def start():
 	data = bottle.request.json
-
+	rand = random.randint(0, 2)
+	taunts = ['µ▓▓╣█ ░░Þ¸¸éÅ', '0xFFFFFF', '0xA28F3C']
+	taunt = taunts[rand]
 	return {
 		'name': name,
 		'color': '#1E90FF',
 		'head_url': 'https://github.com/Nebual/snakefront/blob/master/snake.png?raw=true',
-		'taunt': 'Online bookings for less!'
+		'taunt': taunt
 	}
 
 
