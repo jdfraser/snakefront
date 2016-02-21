@@ -48,20 +48,16 @@ def graphify(HeatMap):
 
 
 
-def cheapest_path(G, Height, HeadPos, TargetPos):
+def cheapest_path(G, heatmap, HeadPos, TargetPos):
+	Height = len(heatmap[0])
 	Path = nx.shortest_path(G, source = HeadPos[0]*Height+HeadPos[1], target=TargetPos[0]*Height+TargetPos[1], weight='weight')
 	PosOfNextMove = [Path[1] // Height, Path[1] % Height]
 	weight = 0
-	for i in range(1, len(Path)-1): #TODO: make sure short paths won't break
-		weight += G[Path[i]][Path[i+1]]['weight'] #Get weight of move
+	for i in range(1, len(Path)):
+		weight += heatmap[Path[i] // Height][Path[i] % Height] #Get weight of move
 	return {
 		"path" : Path,
 		"length" : len(Path),
 		"nextPos" : PosOfNextMove,
 		"cost" : weight
 	}
-
-
-
-G = graphify([[0, 5], [1, 2], [3, 3]])
-#print cheapest_path(G, [0,0], [2,1])

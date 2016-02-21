@@ -106,7 +106,7 @@ def get_move(data, head, heatmap, graph):
 
 def move_coin(data, head, heatmap, graph):
 	if 'gold' in data and len(data['gold']):
-		pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, data['gold'][0])
+		pathdata = pathfinding.cheapest_path(graph, heatmap, head, data['gold'][0])
 		nextcoord = pathdata['nextPos']
 		full_shortest_path = pathdata['path']
 		cost = pathdata['cost']
@@ -120,7 +120,7 @@ def food(data, head, heatmap, graph):
 	shortest = []
 	shortestHeat = 9995
 	for snack in data['food']:
-		pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, snack)
+		pathdata = pathfinding.cheapest_path(graph, heatmap, head, snack)
 		print "Food idea: ", pathdata
 		nextcoord = pathdata['nextPos']
 		full_shortest_path = pathdata['path']
@@ -140,16 +140,16 @@ def idle(data, head, heatmap, graph):
 	if(target == head):
 		return False, 9995
 
-	pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, target)
+	pathdata = pathfinding.cheapest_path(graph, heatmap, head, target)
 	move = pathdata['nextPos']
 	cost = pathdata['cost']
 	return move, cost
 
 def move_idle_dumb(data, head, heatmap, graph):
-	left_pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, [head[0] - 1, head[1]])
-	right_pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, [head[0] + 1, head[1]])
-	up_pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, [head[0], head[1] - 1])
-	down_pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, [head[0], head[1] + 1])
+	left_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0] - 1, head[1]])
+	right_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0] + 1, head[1]])
+	up_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0], head[1] - 1])
+	down_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0], head[1] + 1])
 
 	smallest = min(left_pathdata['cost'], right_pathdata['cost'], up_pathdata['cost'], down_pathdata['cost'])
 	if smallest == left_pathdata['cost']:
