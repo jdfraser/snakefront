@@ -7,8 +7,8 @@ import pathfinding
 from heatmap import print_heatmap, gen_heatmap
 
 name = 'Snakeoverflow'
-#snake_id = '2ca1ab89-620c-4fbe-b876-179013470205'
-snake_id = '99194a3a-985c-4423-9929-53235449f029' #delete-snake
+snake_id = '2ca1ab89-620c-4fbe-b876-179013470205'
+#snake_id = '99194a3a-985c-4423-9929-53235449f029' #delete-snake
 
 #retrieve and parse data from REST API
 @bottle.route('/static/<path:path>')
