@@ -53,7 +53,7 @@ def cheapest_path(G, Height, HeadPos, TargetPos):
 	Path = nx.shortest_path(G, source = HeadPos[0]*Height+HeadPos[1], target=TargetPos[0]*Height+TargetPos[1], weight='weight')
 	PosOfNextMove = [Path[1] // Height, Path[1] % Height]
 	weight = 0
-	for i in range(0, len(Path)-1):
+	for i in range(1, len(Path)-1): #TODO: make sure short paths won't break
 		weight += G[Path[i]][Path[i+1]]['weight'] #Get weight of move
 	return {
 		"path" : Path,
