@@ -78,16 +78,26 @@ def get_move(data, head, heatmap, graph):
 	food_move, food_cost = food(data, head, heatmap, graph)
 	print "coin", coin_cost, "idle", idle_cost, "food", food_cost
 
+	longestSnakeID = ''
+	longestSnakeLength = 0
+	for snake in data['snakes']:
+		if snake['id'] != snake_id and len(snake['coords']) > longestSnakeLength:
+			longestSnakeLength = len(snake['coords'])
+			longestSnakeID = snake['id']
+
 	if coin_cost < 50 and int(data['oursnake']['health']) > 25:
 		return coin_move
 	if(int(data['oursnake']['health']) < 25 and food_cost < 100):
 		return food_move
 	if(int(data['oursnake']['health']) < 50 and food_cost < 70):
 		return food_move
-	if(food_cost < 40):
+	if((longestSnakeLength + 2) >= len(data['oursnake']['coords']) and food_cost < 40):
 		return food_move
 	if(idle_cost < 100):
 		return idle_move
+
+	# Running out of options... find the longest path
+
 
 	# Worst case scenario: Go 1 square in a direction that doesn't immediately kill it
 	return move_idle_dumb(data, head, heatmap, graph)
