@@ -106,7 +106,10 @@ def get_move(data, head, heatmap, graph):
 
 def move_coin(data, head, heatmap, graph):
 	if 'gold' in data and len(data['gold']):
-		nextcoord, full_shortest_path, cost = pathfinding.cheapest_path(graph, len(heatmap[0]), head, data['gold'][0])
+		pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, data['gold'][0])
+		nextcoord = pathdata['nextPos']
+		full_shortest_path = pathdata['path']
+		cost = pathdata['cost']
 		min_coin_distance = (5 + data['oursnake'].get('gold', 0)*2) # Allow further distances as our bank account increases
 		if len(full_shortest_path) < min_coin_distance:
 			return nextcoord, cost
