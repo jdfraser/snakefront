@@ -70,6 +70,7 @@ def get_move(data, head, heatmap, graph):
 	coin_move, coin_cost = move_coin(data, head, heatmap, graph)
 	idle_move, idle_cost = idle(data, head, heatmap, graph)
 	food_move, food_cost = food(data, head, heatmap, graph)
+	print "coin", coin_cost, "idle", idle_cost, "food", food_cost
 
 	if coin_cost < 50 and int(data['oursnake']['health']) > 25:
 		return coin_move
@@ -83,15 +84,15 @@ def move_coin(data, head, heatmap, graph):
 		min_coin_distance = (5 + data['oursnake'].get('gold', 0)*2) # Allow further distances as our bank account increases
 		if len(full_shortest_path) < min_coin_distance:
 			return nextcoord, cost
-	return False, 9999
+	return False, 9995
 
 def food(data, head, heatmap, graph):
 	move = [0,0]
 	shortest = []
-	shortestHeat = 99999
+	shortestHeat = 9995
 	for snack in data['food']:
 		pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, snack)
-		print pathdata
+		print "Food idea: ", pathdata
 		nextcoord = pathdata['nextPos']
 		full_shortest_path = pathdata['path']
 		heat = pathdata['cost']
@@ -103,15 +104,12 @@ def food(data, head, heatmap, graph):
 	return move, shortestHeat
 
 def idle(data, head, heatmap, graph):
-	oursnake = []
-	for snake in data['snakes']:
-		if snake['id'] == snake_id:
-			oursnake = snake['coords']
+	oursnake = data['oursnake']['coords']
 	if(len(oursnake) == 0):
-		return False #didn't find our snake, bail
+		return False, 9995 #didn't find our snake, bail
 	target = oursnake[-1]
 	if(target == head):
-		return False, 99999
+		return False, 9995
 
 	pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, target)
 	move = pathdata['nextPos']

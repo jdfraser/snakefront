@@ -29,7 +29,7 @@ def graphify(HeatMap):
 			cur = column*Height + row
 			next = cur + 1
 			weight = HeatMap[column][row] + HeatMap[column][row+1]
-			print str(cur) + " Add edge between [" + str(column) + "][" + str(row) + "] and [" + str(column) + "][" + str(row+1) + "], weight=" + str(weight)
+			#print str(cur) + " Add edge between [" + str(column) + "][" + str(row) + "] and [" + str(column) + "][" + str(row+1) + "], weight=" + str(weight)
 			G.add_edge(cur, next)
 			G[cur][next]['weight'] = weight
 
@@ -39,10 +39,9 @@ def graphify(HeatMap):
 			cur = column*Height + row
 			next = cur + Height
 			weight = HeatMap[column][row] + HeatMap[column+1][row]
-			print str(next) + " Add edge between [" + str(column) + "][" + str(row) + "] and [" + str(column+1) + "][" + str(row) + "], weight=" + str(weight)
+			#print str(next) + " Add edge between [" + str(column) + "][" + str(row) + "] and [" + str(column+1) + "][" + str(row) + "], weight=" + str(weight)
 			G.add_edge(cur, next)
 			G[cur][next]['weight'] = weight
-	print G.edges()
 
 	return G
 
