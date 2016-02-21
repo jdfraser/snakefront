@@ -3,19 +3,25 @@
 import networkx as nx
 
 
+#HOW TO USE:
+#	Graph = pathfinding.graphify(HeatMap)
+#Then run:
+#	pathfinding.cheapest_path(Graph, HeightOfPlayArea, HeadPos, TargetPos)
+#This returns a dict, see below for names/details
+
+
 
 #Heatmap is an array of the board, with higher values being less safe.
 #Headpos is the [column, row] of the snake head.
-#Target is the [column, row] of the target.
 
-#RETURNS a tuple: the position of our next move, the shortest path to the target
-def shortest_path(HeatMap, HeadPos, Target):
+#RETURNS a networkx graph
+def graphify(HeatMap):
 	Height = len(HeatMap[0])
 	Width = len(HeatMap)
 	G = nx.Graph()
 
 	G.add_nodes_from(range(0, Height*Width))
-	#print G.number_of_nodes()
+	print "Num nodes: " + str(G.number_of_nodes())
 
 	#Add vertical edges
 	for column in range(0, Width):
@@ -23,7 +29,7 @@ def shortest_path(HeatMap, HeadPos, Target):
 			cur = column*Height + row
 			next = cur + 1
 			weight = HeatMap[column][row] + HeatMap[column][row+1]
-			#print str(cur) + " Add edge between [" + str(column) + "][" + str(row) + "] and [" + str(column) + "][" + str(row+1) + "], weight=" + str(weight)
+			print str(cur) + " Add edge between [" + str(column) + "][" + str(row) + "] and [" + str(column) + "][" + str(row+1) + "], weight=" + str(weight)
 			G.add_edge(cur, next)
 			G[cur][next]['weight'] = weight
 
@@ -33,20 +39,29 @@ def shortest_path(HeatMap, HeadPos, Target):
 			cur = column*Height + row
 			next = cur + Height
 			weight = HeatMap[column][row] + HeatMap[column+1][row]
-			#print str(next) + " Add edge between [" + str(column) + "][" + str(row) + "] and [" + str(column+1) + "][" + str(row) + "], weight=" + str(weight)
+			print str(next) + " Add edge between [" + str(column) + "][" + str(row) + "] and [" + str(column+1) + "][" + str(row) + "], weight=" + str(weight)
 			G.add_edge(cur, next)
 			G[cur][next]['weight'] = weight
 
-	Path = nx.shortest_path(G, source = HeadPos[0]*Height+HeadPos[1], target=Target[0]*Height+Target[1], weight='weight')
-	print Path
-	print "Edges: "
-	print G.edges()
+	return G
+
+
+
+
+def cheapest_path(G, Height, HeadPos, TargetPos):
+	Path = nx.shortest_path(G, source = HeadPos[0]*Height+HeadPos[1], target=TargetPos[0]*Height+TargetPos[1], weight='weight')
+	PosOfNextMove = [Path[1] // Height, Path[1] % Height]
 	weight = 0
 	for i in range(0, len(Path)-1):
 		weight += G[Path[i]][Path[i+1]]['weight'] #Get weight of move
-	return [Path[1] // Height, Path[1] % Height], Path, weight
-			
+	return {
+		"path" : Path,
+		"length" : len(Path),
+		"nextPos" : PosOfNextMove,
+		"cost" : weight
+	}
 
 
 
-print shortest_path([[0, 5], [1, 2], [3, 3]], [0,0], [2,1])
+#G = graphify([[0, 5], [1, 2], [3, 3]], [0,0], [2,1])
+#print cheapest_path(G, [0,0], [2,1])

@@ -2,7 +2,7 @@ import bottle
 import os
 import json
 import copy
-from pathfinding import shortest_path
+import pathfinding
 from heatmap import print_heatmap, gen_heatmap
 
 name = 'Snakeoverflow'
@@ -44,6 +44,7 @@ def start():
 def move():
 	data = bottle.request.json
 	heatmap = gen_heatmap(data, snake_id)
+	graph = pathfinding.graphify(heatmap)
 	print_heatmap(heatmap)
 
 	oursnake = None
@@ -56,7 +57,7 @@ def move():
 	move = [0,0]
 	taunt = "Booking in progress"
 
-	move = get_move(data, head, heatmap)
+	move = get_move(data, head, heatmap, graph)
 
 	if move in oursnake['coords']:
 		pass #TODO: WTF DON'T MOVE INTO OURSELF!!
@@ -66,10 +67,10 @@ def move():
 		'taunt': 'battlesnake-python!'
 	}
 
-def get_move(data, head, heatmap):
+def get_move(data, head, heatmap, graph):
 	# try different algorithms and pick our favourite one 
-	idle_move, idle_cost = idle(data, head, heatmap)
-	food_move, food_cost = food(data, head, heatmap)
+	idle_move, idle_cost = idle(data, head, heatmap, graph)
+	food_move, food_cost = food(data, head, heatmap, graph)
 	if(idle_move == False):
 		return food_move
 	smallest_cost = min(idle_cost, food_cost)
@@ -78,19 +79,22 @@ def get_move(data, head, heatmap):
 	elif(food_cost == smallest_cost):
 		return food_move
 
-def food(data, head, heatmap):
+def food(data, head, heatmap, graph):
 	shortest = []
 	shortestHeat = 99999
 	for snack in data['food']:
-		nextcoord, full_shortest_path, heat = shortest_path(heatmap, head, snack)
+		pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, snack)
+		nextcoord = pathdata['nextPos']
+		full_shortest_path = pathdata['path']
+		heat = pathdata['cost']
 		if heat < shortestHeat:
 			shortest = full_shortest_path
 			move = nextcoord
 			shortestHeat = heat
 	print "Recommend next move to " + str(move)
-	return move, cost
+	return move, shortestHeat 
 
-def idle(data, head, heatmap):
+def idle(data, head, heatmap, graph):
 	oursnake = []
 	for snake in data['snakes']:
 		if snake['id'] == snake_id:
@@ -101,7 +105,9 @@ def idle(data, head, heatmap):
 	if(target == head):
 		return False, 99999
 
-	move, full_shortest_path, cost = shortest_path(heatmap, head, target)
+	pathdata = pathfinding.cheapest_path(graph, len(heatmap[0]), head, target)
+	move = pathdata['nextPos']
+	cost = pathdata['cost']
 	return move, cost
 
 def get_direction_from_target_headpos(head, move):
