@@ -2,6 +2,7 @@ import bottle
 import os
 import json
 import copy
+import random
 import pathfinding
 from heatmap import print_heatmap, gen_heatmap
 
