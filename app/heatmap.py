@@ -33,12 +33,19 @@ def gen_heatmap(requestdata, maxturns=9, use_rings=True):
 	oursnakeHead = oursnake['coords'][0]
 	oursnakeNeck = oursnake['coords'][1]
 	oursnakeLength = len(oursnake['coords'])
-	for turn in range(1, maxturns+1):
+
+	# Find the longest snake, so we can continue looping over every snake's entire torso
+	longestSnakeLength = oursnakeLength
+	for snake in state['snakes']:
+		longestSnakeLength = max(longestSnakeLength, len(snake['coords']))
+
+	for turn in range(1, max(maxturns+1, longestSnakeLength)):
 		heatmap = default_heatmap(width, height)
 		snakes = copy.deepcopy(state['snakes'])
 		for snake in snakes:
 			coords = snake['coords']
-			if snake['id'] != state['you']:
+			# Skip parsing OUR heat (we control that) and (because this gets exponetially expensive) limit to maxturns
+			if snake['id'] != state['you'] and turn <= maxturns:
 				# parse heat around the head
 				we_are_bigger = (len(coords) < oursnakeLength)
 				fractal_heat(heatmap, width, height, coords[0][0], coords[0][1], coords[1][0], coords[1][1], turn - we_are_bigger, (turn == 1 and 100.0 or 33.0))
