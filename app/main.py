@@ -6,9 +6,8 @@ import random
 import pathfinding
 from heatmap import print_heatmap, gen_heatmap
 
-name = 'Snakeoverflow'
-snake_id = '2ca1ab89-620c-4fbe-b876-179013470205'
-#snake_id = '99194a3a-985c-4423-9929-53235449f029' #delete-snake
+name = 'camel_Snake'
+snake_id = ''
 
 #retrieve and parse data from REST API
 @bottle.route('/static/<path:path>')
@@ -38,7 +37,9 @@ def start():
 	return {
 		'name': name,
 		'color': '#1E90FF',
-		'head_url': 'https://github.com/Nebual/snakefront/blob/master/snake.png?raw=true',
+		'head_url': 'https://demo.checkfront.com/images/checky.png',
+		'head_type': 'smile',
+		'tail_type': 'fat-rattle',
 		'taunt': taunt
 	}
 
@@ -87,11 +88,11 @@ def get_move(data, head, heatmap, graph):
 			longestSnakeLength = len(snake['coords'])
 			longestSnakeID = snake['id']
 
-	if coin_cost < 50 and int(data['oursnake']['health']) > 25:
+	if coin_cost < 50 and int(data['oursnake']['health_points']) > 25:
 		return coin_move
-	if(int(data['oursnake']['health']) < 25 and food_cost < 100):
+	if(int(data['oursnake']['health_points']) < 25 and food_cost < 100):
 		return food_move
-	if(int(data['oursnake']['health']) < 50 and food_cost < 70):
+	if(int(data['oursnake']['health_points']) < 50 and food_cost < 70):
 		return food_move
 	if((longestSnakeLength + 2) >= len(data['oursnake']['coords']) and food_cost < 40):
 		return food_move
@@ -163,19 +164,21 @@ def move_idle_dumb(data, head, heatmap, graph):
 
 def get_direction_from_target_headpos(head, move):
 	if move[1] > head[1]:
-	    nextmove = 'south'
+		nextmove = 'down'
 	elif move[1] < head[1]:
-	    nextmove = 'north'
+		nextmove = 'up'
 	elif move[0] > head[0]:
-	    nextmove = 'east'
+		nextmove = 'right'
 	elif move[0] < head[0]:
-	    nextmove = 'west'
+		nextmove = 'left'
 	else:
-	    print "UHHHH wat are you trying to move to yourself??"
-	    nextmove = 'west'
+		print "UHHHH wat are you trying to move to yourself??"
+		nextmove = 'left'
 	return nextmove
 
 def find_our_snake(request_data):
+	global snake_id
+	snake_id = request_data['you']
 	request_data['oursnake'] = dict()
 	request_data['ourhead'] = [0, 0]
 	for snake in request_data['snakes']:

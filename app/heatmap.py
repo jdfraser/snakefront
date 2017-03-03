@@ -39,7 +39,7 @@ def gen_heatmap(requestdata, our_id='2ca1ab89-620c-4fbe-b876-179013470205', maxt
 		snakes = copy.deepcopy(state['snakes'])
 		for snake in snakes:
 			coords = snake['coords']
-			if snake['id'] != our_id:
+			if snake['id'] != state['you']:
 				# parse heat around the head
 				we_are_bigger = (len(coords) < oursnakeLength)
 				fractal_heat(heatmap, coords[0], coords[1], turn - we_are_bigger, (turn == 1 and 100 or 33.0))
