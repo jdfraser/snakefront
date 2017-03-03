@@ -54,3 +54,8 @@ docs/_build/
 target/
 
 *~
+
+# Cython
+app/*.html
+app/*.c
+Profile.prof

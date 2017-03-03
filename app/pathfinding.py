@@ -21,7 +21,6 @@ def graphify(HeatMap):
 	G = nx.Graph()
 
 	G.add_nodes_from(range(0, Height*Width))
-	print "Num nodes: " + str(G.number_of_nodes())
 
 	#Add vertical edges
 	for column in range(0, Width):

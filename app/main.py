@@ -3,8 +3,11 @@ import os
 import json
 import copy
 import random
+import time
+
 import pathfinding
 from heatmap import print_heatmap, gen_heatmap
+import util
 
 name = 'camel_Snake'
 snake_id = ''
@@ -46,12 +49,16 @@ def start():
 
 @bottle.post('/move')
 def move():
+	print "\n\n"
+	time_start_request = time.clock()
 	data = bottle.request.json
 
 	find_our_snake(data)
 
-	heatmap = gen_heatmap(data, snake_id)
-	graph = pathfinding.graphify(heatmap)
+	with util.TimerPrint("Heatmap Time"):
+		heatmap = gen_heatmap(data)
+	with util.TimerPrint("Graph Time"):
+		graph = pathfinding.graphify(heatmap)
 	print_heatmap(heatmap)
 
 	shortest = []
@@ -71,6 +78,8 @@ def move():
 	}
 	if random.randint(0, 10) == 0:
 		response['taunt'] = taunt
+
+	print "\nFull Request Time:", str(round((time.clock() - time_start_request) * 1000, 3)) + "ms"
 	return response
 
 def get_move(data, head, heatmap, graph):
@@ -130,7 +139,7 @@ def food(data, head, heatmap, graph):
 			shortest = full_shortest_path
 			move = nextcoord
 			shortestHeat = heat
-	print "Recommend next move to " + str(move)
+	print "Recommend next move", get_direction_from_target_headpos(head, move), str(move)
 	return move, shortestHeat
 
 def idle(data, head, heatmap, graph):
