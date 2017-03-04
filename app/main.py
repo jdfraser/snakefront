@@ -12,7 +12,8 @@ import util
 name = 'camel_Snake'
 snake_id = ''
 
-#retrieve and parse data from REST API
+
+# retrieve and parse data from REST API
 @bottle.route('/static/<path:path>')
 def static(path):
 	return bottle.static_file(path, root='static/')
@@ -26,8 +27,8 @@ def index():
 	)
 
 	return {
-	'color': '#00ff00',
-	'head': head_url
+		'color': '#00ff00',
+		'head': head_url
 	}
 
 
@@ -72,7 +73,7 @@ def main_logic(data):
 	move = get_move(data, data['ourhead'], heatmap, graph)
 
 	if move in data['oursnake']['coords']:
-		pass #TODO: WTF DON'T MOVE INTO OURSELF!!
+		pass  # TODO: WTF DON'T MOVE INTO OURSELF!!
 
 	response = {
 		'move': get_direction_from_target_headpos(data['ourhead'], move)
@@ -82,6 +83,7 @@ def main_logic(data):
 
 	print "\nFull Request Time:", str(round((time.clock() - time_start_request) * 1000, 3)) + "ms"
 	return response
+
 
 def get_move(data, head, heatmap, graph):
 	# try different algorithms and pick our favourite one
@@ -100,19 +102,19 @@ def get_move(data, head, heatmap, graph):
 
 	move_name = ''
 
-	if(int(data['oursnake']['health_points']) < 25 and food_cost < 100):
+	if (int(data['oursnake']['health_points']) < 25 and food_cost < 100):
 		move = food_move
 		move_name = 'food'
-	elif(int(data['oursnake']['health_points']) < 50 and food_cost < 70):
+	elif (int(data['oursnake']['health_points']) < 50 and food_cost < 70):
 		move = food_move
 		move_name = 'food'
-	elif((longestSnakeLength + 2) >= len(data['oursnake']['coords']) and food_cost < 40):
+	elif ((longestSnakeLength + 2) >= len(data['oursnake']['coords']) and food_cost < 40):
 		move = food_move
 		move_name = 'food'
 	elif(follow_cost < 200):
 		move = follow_move
 		move_name = 'follow'
-	elif(idle_cost < 100):
+	elif (idle_cost < 100):
 		move = idle_move
 		move_name = 'idle'
 	else:
@@ -123,16 +125,17 @@ def get_move(data, head, heatmap, graph):
 
 	return move
 
-	# Running out of options... find the longest path
 
-	# Worst case scenario: Go 1 square in a direction that doesn't immediately kill it
+# Running out of options... find the longest path
+
+# Worst case scenario: Go 1 square in a direction that doesn't immediately kill it
 
 def food(data, head, heatmap, graph):
-	move = [0,0]
+	move = [0, 0]
 	shortest = []
 	cost = 9995
 	for snack in data['food']:
-		pathdata = pathfinding.cheapest_path(graph, heatmap, head, snack)
+		pathdata = pathfinding.cheapest_path(graph, heatmap, head, snack, data)
 		print "Food idea: ", pathdata
 		nextcoord = pathdata['nextPos']
 		full_shortest_path = pathdata['path']
@@ -141,21 +144,31 @@ def food(data, head, heatmap, graph):
 			shortest = full_shortest_path
 			move = nextcoord
 			cost = heat
+
+	if not util.is_valid_move(move, data):
+		return util.bad_move()
+
 	return move, cost
+
 
 def idle(data, head, heatmap, graph):
 	oursnake = data['oursnake']['coords']
-	if(len(oursnake) == 0):
-		return False, 9995 #didn't find our snake, bail
+	if (len(oursnake) == 0):
+		return util.bad_move()  # didn't find our snake, bail
 
 	target = oursnake[-1]
-	if(target == head):
-		return False, 9995
+	if (target == head):
+		return util.bad_move()
 
-	pathdata = pathfinding.cheapest_path(graph, heatmap, head, target)
+	pathdata = pathfinding.cheapest_path(graph, heatmap, head, target, data)
 	move = pathdata['nextPos']
 	cost = pathdata['cost']
+
+	if not util.is_valid_move(move, data):
+		return util.bad_move()
+
 	return move, cost
+
 
 # Follow other snakes' tails if we're right next to one
 def follow(data, head, heatmap, graph):
@@ -163,23 +176,28 @@ def follow(data, head, heatmap, graph):
 
 	for snake in data['snakes']:
 		snake_tail = snake['coords'][-1]
-		if dist(head, snake_tail) == 1:
+		if util.dist(head, snake_tail) == 1:
 			target = snake_tail
 
 	if not target:
-		#No tails nearby
-		return False, 9995
+		# No tails nearby
+		return util.bad_move()
 
-	pathdata = pathfinding.cheapest_path(graph, heatmap, head, target)
+	pathdata = pathfinding.cheapest_path(graph, heatmap, head, target, data)
 	move = pathdata['nextPos']
 	cost = pathdata['cost']
+
+	if not util.is_valid_move(move, data):
+		return util.bad_move()
+
 	return move, cost
 
+
 def move_idle_dumb(data, head, heatmap, graph):
-	left_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [max(0, head[0] - 1), head[1]])
-	right_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [min(len(heatmap)-1, head[0] + 1), head[1]])
-	up_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0], max(0, head[1] - 1)])
-	down_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0], min(len(heatmap[0])-1, head[1] + 1)])
+	left_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [max(0, head[0] - 1), head[1]], data)
+	right_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [min(len(heatmap)-1, head[0] + 1), head[1]], data)
+	up_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0], max(0, head[1] - 1)], data)
+	down_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0], min(len(heatmap[0])-1, head[1] + 1)], data)
 
 	smallest = min(left_pathdata['cost'], right_pathdata['cost'], up_pathdata['cost'], down_pathdata['cost'])
 	if smallest == left_pathdata['cost']:
@@ -190,6 +208,7 @@ def move_idle_dumb(data, head, heatmap, graph):
 		return up_pathdata['nextPos']
 	if smallest == down_pathdata['cost']:
 		return down_pathdata['nextPos']
+
 
 def get_direction_from_target_headpos(head, move):
 	if move[1] > head[1]:
@@ -205,6 +224,7 @@ def get_direction_from_target_headpos(head, move):
 		nextmove = 'left'
 	return nextmove
 
+
 def find_our_snake(request_data):
 	global snake_id
 	snake_id = request_data['you']
@@ -214,6 +234,7 @@ def find_our_snake(request_data):
 		if snake['id'] == snake_id:
 			request_data['ourhead'] = snake['coords'][0]
 			request_data['oursnake'] = snake
+
 
 @bottle.post('/end')
 def end():
@@ -225,10 +246,9 @@ def end():
 		'taunt': 'battlesnake-python!'
 	}
 
-def dist(a, b):
-	return abs(b[0] - a[0]) + abs(b[1] - a[1])
-
 # Expose WSGI app (so gunicorn can find it)
 application = bottle.default_app()
 if __name__ == '__main__':
 	bottle.run(application, host=os.getenv('IP', '0.0.0.0'), port=os.getenv('PORT', '8080'))
+
+

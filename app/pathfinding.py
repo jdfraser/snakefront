@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import networkx as nx
+import util
 
 
 # HOW TO USE:
@@ -44,8 +45,8 @@ def graphify(HeatMap):
     return g
 
 
-def cheapest_path(G, heatmap, head_pos, target_pos):
-    if head_pos[0] == target_pos[0] and head_pos[1] == target_pos[1]:
+def cheapest_path(G, heatmap, head_pos, target_pos, data):
+    if not util.is_valid_move(target_pos, data):
         return {
             "path": [],
             "length": 0,
