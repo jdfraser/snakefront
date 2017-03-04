@@ -50,20 +50,20 @@ def start():
 @bottle.post('/move')
 def move():
 	print "\n\n"
-	time_start_request = time.clock()
 	data = bottle.request.json
 
 	find_our_snake(data)
 	# print(data) # Uncomment this to save a full game state
+	return main_logic(data)
+
+def main_logic(data):
+	time_start_request = time.clock()
 
 	with util.TimerPrint("Heatmap Time"):
 		heatmap = gen_heatmap(data)
 	with util.TimerPrint("Graph Time"):
 		graph = pathfinding.graphify(heatmap)
 	print_heatmap(heatmap)
-
-	shortest = []
-	move = [0,0]
 
 	rand = random.randint(0, 2)
 	taunts = ['0xA9FF33', '0xFFFFFF', '0xA28F3C']
@@ -109,7 +109,7 @@ def get_move(data, head, heatmap, graph):
 	elif((longestSnakeLength + 2) >= len(data['oursnake']['coords']) and food_cost < 40):
 		move = food_move
 		move_name = 'food'
-	elif(follow_cost < 9000):
+	elif(follow_cost < 200):
 		move = follow_move
 		move_name = 'follow'
 	elif(idle_cost < 100):
