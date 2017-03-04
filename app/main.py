@@ -54,6 +54,7 @@ def move():
 	data = bottle.request.json
 
 	find_our_snake(data)
+	# print(data) # Uncomment this to save a full game state
 
 	with util.TimerPrint("Heatmap Time"):
 		heatmap = gen_heatmap(data)
@@ -176,9 +177,9 @@ def follow(data, head, heatmap, graph):
 
 def move_idle_dumb(data, head, heatmap, graph):
 	left_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [max(0, head[0] - 1), head[1]])
-	right_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [min(len(heatmap), head[0] + 1), head[1]])
+	right_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [min(len(heatmap)-1, head[0] + 1), head[1]])
 	up_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0], max(0, head[1] - 1)])
-	down_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0], min(len(heatmap[0]), head[1] + 1)])
+	down_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0], min(len(heatmap[0])-1, head[1] + 1)])
 
 	smallest = min(left_pathdata['cost'], right_pathdata['cost'], up_pathdata['cost'], down_pathdata['cost'])
 	if smallest == left_pathdata['cost']:
