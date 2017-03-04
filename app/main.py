@@ -85,10 +85,10 @@ def move():
 def get_move(data, head, heatmap, graph):
 	# try different algorithms and pick our favourite one
 
-	#coin_move, coin_cost = move_coin(data, head, heatmap, graph)
 	idle_move, idle_cost = idle(data, head, heatmap, graph)
 	food_move, food_cost = food(data, head, heatmap, graph)
-	print "idle", idle_cost, "food", food_cost
+	follow_move, follow_cost = follow(data, head, heatmap, graph)
+	print "follow", follow_cost, "idle", idle_cost, "food", food_cost
 
 	longestSnakeID = ''
 	longestSnakeLength = 0
@@ -97,57 +97,76 @@ def get_move(data, head, heatmap, graph):
 			longestSnakeLength = len(snake['coords'])
 			longestSnakeID = snake['id']
 
-	#if coin_cost < 50 and int(data['oursnake']['health_points']) > 25:
-	#	return coin_move
+	move_name = ''
+
 	if(int(data['oursnake']['health_points']) < 25 and food_cost < 100):
-		return food_move
-	if(int(data['oursnake']['health_points']) < 50 and food_cost < 70):
-		return food_move
-	if((longestSnakeLength + 2) >= len(data['oursnake']['coords']) and food_cost < 40):
-		return food_move
-	if(idle_cost < 100):
-		return idle_move
+		move = food_move
+		move_name = 'food'
+	elif(int(data['oursnake']['health_points']) < 50 and food_cost < 70):
+		move = food_move
+		move_name = 'food'
+	elif((longestSnakeLength + 2) >= len(data['oursnake']['coords']) and food_cost < 40):
+		move = food_move
+		move_name = 'food'
+	elif(follow_cost < 9000):
+		move = follow_move
+		move_name = 'follow'
+	elif(idle_cost < 100):
+		move = idle_move
+		move_name = 'idle'
+	else:
+		move = move_idle_dumb(data, head, heatmap, graph)
+		move_name = 'default'
+
+	print "Recommend next move", move_name, get_direction_from_target_headpos(head, move), str(move)
+
+	return move
 
 	# Running out of options... find the longest path
 
-
 	# Worst case scenario: Go 1 square in a direction that doesn't immediately kill it
-	return move_idle_dumb(data, head, heatmap, graph)
-
-def move_coin(data, head, heatmap, graph):
-	if 'gold' in data and len(data['gold']):
-		pathdata = pathfinding.cheapest_path(graph, heatmap, head, data['gold'][0])
-		nextcoord = pathdata['nextPos']
-		full_shortest_path = pathdata['path']
-		cost = pathdata['cost']
-		min_coin_distance = (10 + data['oursnake'].get('gold', 0)*2) # Allow further distances as our bank account increases
-		if len(full_shortest_path) < min_coin_distance:
-			return nextcoord, cost
-	return False, 9995
 
 def food(data, head, heatmap, graph):
 	move = [0,0]
 	shortest = []
-	shortestHeat = 9995
+	cost = 9995
 	for snack in data['food']:
 		pathdata = pathfinding.cheapest_path(graph, heatmap, head, snack)
 		print "Food idea: ", pathdata
 		nextcoord = pathdata['nextPos']
 		full_shortest_path = pathdata['path']
 		heat = pathdata['cost']
-		if heat < shortestHeat:
+		if heat < cost:
 			shortest = full_shortest_path
 			move = nextcoord
-			shortestHeat = heat
-	print "Recommend next move", get_direction_from_target_headpos(head, move), str(move)
-	return move, shortestHeat
+			cost = heat
+	return move, cost
 
 def idle(data, head, heatmap, graph):
 	oursnake = data['oursnake']['coords']
 	if(len(oursnake) == 0):
 		return False, 9995 #didn't find our snake, bail
+
 	target = oursnake[-1]
 	if(target == head):
+		return False, 9995
+
+	pathdata = pathfinding.cheapest_path(graph, heatmap, head, target)
+	move = pathdata['nextPos']
+	cost = pathdata['cost']
+	return move, cost
+
+# Follow other snakes' tails if we're right next to one
+def follow(data, head, heatmap, graph):
+	target = False
+
+	for snake in data['snakes']:
+		snake_tail = snake['coords'][-1]
+		if dist(head, snake_tail) == 1:
+			target = snake_tail
+
+	if not target:
+		#No tails nearby
 		return False, 9995
 
 	pathdata = pathfinding.cheapest_path(graph, heatmap, head, target)
@@ -205,6 +224,8 @@ def end():
 		'taunt': 'battlesnake-python!'
 	}
 
+def dist(a, b):
+	return abs(b[0] - a[0]) + abs(b[1] - a[1])
 
 # Expose WSGI app (so gunicorn can find it)
 application = bottle.default_app()
