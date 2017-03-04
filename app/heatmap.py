@@ -1,4 +1,5 @@
 import copy, math
+import util
 
 def default_heatmap(width, height):
 	heatmap = []
@@ -49,6 +50,8 @@ def gen_heatmap(requestdata, maxturns=9, use_rings=True):
 		snakes = copy.deepcopy(state['snakes'])
 		for snake in snakes:
 			coords = snake['coords']
+			snake_tail = coords[-1]
+			tail_is_safe = snake['health_points'] < 100
 			# Skip parsing OUR heat (we control that) and (because this gets exponetially expensive) limit to maxturns
 			food_found = 0
 			if turn <= maxturns:
@@ -71,6 +74,8 @@ def gen_heatmap(requestdata, maxturns=9, use_rings=True):
 			except IndexError: pass
 
 			for x,y in coords:
+				if [x, y] == snake_tail and tail_is_safe:
+					continue
 				heatmap[x][y] += 700
 		for x, col in enumerate(heatmap):
 			for y, heat in enumerate(col):
