@@ -85,10 +85,10 @@ def move():
 def get_move(data, head, heatmap, graph):
 	# try different algorithms and pick our favourite one
 
-	coin_move, coin_cost = move_coin(data, head, heatmap, graph)
+	#coin_move, coin_cost = move_coin(data, head, heatmap, graph)
 	idle_move, idle_cost = idle(data, head, heatmap, graph)
 	food_move, food_cost = food(data, head, heatmap, graph)
-	print "coin", coin_cost, "idle", idle_cost, "food", food_cost
+	print "idle", idle_cost, "food", food_cost
 
 	longestSnakeID = ''
 	longestSnakeLength = 0
@@ -97,8 +97,8 @@ def get_move(data, head, heatmap, graph):
 			longestSnakeLength = len(snake['coords'])
 			longestSnakeID = snake['id']
 
-	if coin_cost < 50 and int(data['oursnake']['health_points']) > 25:
-		return coin_move
+	#if coin_cost < 50 and int(data['oursnake']['health_points']) > 25:
+	#	return coin_move
 	if(int(data['oursnake']['health_points']) < 25 and food_cost < 100):
 		return food_move
 	if(int(data['oursnake']['health_points']) < 50 and food_cost < 70):
