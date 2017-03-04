@@ -123,7 +123,8 @@ def get_move(data, head, heatmap, graph):
 			longestSnakeLength = len(snake['coords'])
 			longestSnakeID = snake['id']
 
-	move_name = ''
+	move = move_idle_dumb(data, head, heatmap, graph)
+	move_name = 'default'
 
 	if (int(data['oursnake']['health_points']) < starvation_Limit and food_cost < starvation_Cost):
 		move = food_move
@@ -140,9 +141,6 @@ def get_move(data, head, heatmap, graph):
 	elif (idle_cost < idle_Cost_Limit):
 		move = idle_move
 		move_name = 'idle'
-	else:
-		move = move_idle_dumb(data, head, heatmap, graph)
-		move_name = 'default'
 
 	print head, move, move_name
 	print "Recommend next move", move_name, get_direction_from_target_headpos(head, move), str(move)
@@ -160,7 +158,7 @@ def food(data, head, heatmap, graph):
 	cost = 9995
 	for snack in data['food']:
 		pathdata = pathfinding.cheapest_path(graph, heatmap, head, snack, data)
-		print "Food idea: ", pathdata
+		#print "Food idea: ", pathdata
 		nextcoord = pathdata['nextPos']
 		full_shortest_path = pathdata['path']
 		heat = pathdata['cost']
