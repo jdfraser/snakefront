@@ -6,21 +6,26 @@ def default_heatmap(width, height):
 		heatmap.append([1]*height)
 	return heatmap
 
-def fractal_heat(data, width, height, head_x, head_y, neck_x, neck_y, depth, factor):
-	if depth <= 0: return
+def fractal_heat(state, data, width, height, head_x, head_y, neck_x, neck_y, depth, factor, food_found=0):
+	if depth <= 0.5: return food_found
 	# This was a for x,y in [(0,1),(0,-1),(1,0),(-1,0)]:, but unrolling this was WAY faster
-	heat_direction(data, width, height, head_x    , head_y + 1, head_x, head_y, neck_x, neck_y, depth, factor)
-	heat_direction(data, width, height, head_x    , head_y - 1, head_x, head_y, neck_x, neck_y, depth, factor)
-	heat_direction(data, width, height, head_x + 1, head_y,     head_x, head_y, neck_x, neck_y, depth, factor)
-	heat_direction(data, width, height, head_x - 1, head_y,     head_x, head_y, neck_x, neck_y, depth, factor)
+	food_found = heat_direction(state, data, width, height, head_x    , head_y + 1, head_x, head_y, neck_x, neck_y, depth, factor, food_found)
+	food_found = heat_direction(state, data, width, height, head_x    , head_y - 1, head_x, head_y, neck_x, neck_y, depth, factor, food_found)
+	food_found = heat_direction(state, data, width, height, head_x + 1, head_y,     head_x, head_y, neck_x, neck_y, depth, factor, food_found)
+	food_found = heat_direction(state, data, width, height, head_x - 1, head_y,     head_x, head_y, neck_x, neck_y, depth, factor, food_found)
+	return food_found
 
-def heat_direction(data, width, height, new_head_x, new_head_y, head_x, head_y, neck_x, neck_y, depth, factor):
+def heat_direction(state, data, width, height, new_head_x, new_head_y, head_x, head_y, neck_x, neck_y, depth, factor, food_found):
 	if new_head_x == neck_x and new_head_y == neck_y:
-		return # not backwards
+		return food_found # not backwards
 	if new_head_x < 0 or new_head_x >= width or new_head_y < 0 or new_head_y >= height:
-		return # stay inside the map
+		return food_found # stay inside the map
+	if (new_head_x * 1000 + new_head_y) in state['food_cache']:
+		factor *= 2
+		food_found += 1
+		state['food_cache'].remove(new_head_x * 1000 + new_head_y)
 	data[new_head_x][new_head_y] += factor
-	fractal_heat(data, width, height, new_head_x, new_head_y, head_x, head_y, depth-1, factor/3)
+	return fractal_heat(state, data, width, height, new_head_x, new_head_y, head_x, head_y, depth-1, factor/3, food_found)
 
 # maxturns=11 or even 12 is possible with cython, 9 is better for regular python
 def gen_heatmap(requestdata, maxturns=9, use_rings=True):
@@ -45,16 +50,24 @@ def gen_heatmap(requestdata, maxturns=9, use_rings=True):
 		for snake in snakes:
 			coords = snake['coords']
 			# Skip parsing OUR heat (we control that) and (because this gets exponetially expensive) limit to maxturns
-			if snake['id'] != state['you'] and turn <= maxturns:
-				# parse heat around the head
-				we_are_bigger = (len(coords) < oursnakeLength)
-				fractal_heat(heatmap, width, height, coords[0][0], coords[0][1], coords[1][0], coords[1][1], turn - we_are_bigger, (turn == 1 and 100.0 or 33.0))
-			# todo: what if they ate food?
+			food_found = 0
+			if turn <= maxturns:
+				state['food_cache'] = []
+				for food_coords in state['food']:
+					state['food_cache'].append(food_coords[0] * 1000 + food_coords[1])
+				if snake['id'] != state['you']:
+					# parse heat around the head
+					we_are_bigger = (len(coords) < oursnakeLength)
+					food_found = fractal_heat(state, heatmap, width, height, coords[0][0], coords[0][1], coords[1][0], coords[1][1], turn - we_are_bigger, (turn == 1 and 100.0 or 33.0))
+				else:
+					# parse heat around the head
+					we_are_bigger = (len(coords) < oursnakeLength)
+					food_found = fractal_heat(state, default_heatmap(width, height), width, height, coords[0][0], coords[0][1], coords[1][0], coords[1][1], turn - we_are_bigger, (turn == 1 and 100.0 or 33.0))
 
 			# Now parse the body
 			try:
 				# Remove tail components that will move by the time we reach them
-				for i in range(turn): coords.pop()
+				for i in range(turn - food_found): coords.pop()
 			except IndexError: pass
 
 			for x,y in coords:
