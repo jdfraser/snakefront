@@ -22,6 +22,10 @@ class TimerPrint(Timer):
 
 def is_valid_move(possible_move, data):
 
+	# at round 1, our head == our tail, so run this check before the next one
+	if possible_move == data['oursnake']['coords'][0]:
+		return False
+
 	if possible_move == data['oursnake']['coords'][-1]:
 		#it's fine to chase our tail
 		return True
