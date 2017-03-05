@@ -8,7 +8,7 @@ def default_heatmap(width, height):
 	return heatmap
 
 def fractal_heat(state, data, width, height, head_x, head_y, neck_x, neck_y, depth, factor, food_found=0):
-	if depth <= 1: return food_found
+	if depth <= 0 or factor <= 0.4: return food_found
 	# This was a for x,y in [(0,1),(0,-1),(1,0),(-1,0)]:, but unrolling this was WAY faster
 	food_found = heat_direction(state, data, width, height, head_x    , head_y + 1, head_x, head_y, neck_x, neck_y, depth, factor, food_found)
 	food_found = heat_direction(state, data, width, height, head_x    , head_y - 1, head_x, head_y, neck_x, neck_y, depth, factor, food_found)
@@ -22,7 +22,7 @@ def heat_direction(state, data, width, height, new_head_x, new_head_y, head_x, h
 	if new_head_x < 0 or new_head_x >= width or new_head_y < 0 or new_head_y >= height:
 		return food_found # stay inside the map
 	if (new_head_x * 1000 + new_head_y) in state['food_cache']:
-		factor *= 2
+		factor *= 3
 		food_found += 1
 		state['food_cache'].remove(new_head_x * 1000 + new_head_y)
 	data[new_head_x][new_head_y] += factor
