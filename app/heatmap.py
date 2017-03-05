@@ -50,8 +50,6 @@ def gen_heatmap(requestdata, maxturns=9, use_rings=True):
 		snakes = copy.deepcopy(state['snakes'])
 		for snake in snakes:
 			coords = snake['coords']
-			snake_tail = coords[-1]
-			tail_is_safe = snake['health_points'] < 100
 			# Skip parsing OUR heat (we control that) and (because this gets exponetially expensive) limit to maxturns
 			food_found = 0
 			if turn <= maxturns:
@@ -70,12 +68,12 @@ def gen_heatmap(requestdata, maxturns=9, use_rings=True):
 			# Now parse the body
 			try:
 				# Remove tail components that will move by the time we reach them
-				for i in range(turn - food_found): coords.pop()
+				tails_to_remove = min(turn - food_found - 1, 0)
+
+				for i in range(tails_to_remove): coords.pop()
 			except IndexError: pass
 
 			for x,y in coords:
-				if [x, y] == snake_tail and tail_is_safe:
-					continue
 				heatmap[x][y] += 700
 		for x, col in enumerate(heatmap):
 			for y, heat in enumerate(col):
