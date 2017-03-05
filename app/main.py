@@ -12,6 +12,8 @@ import util
 
 snake_id = ''
 
+taunts = ['get_Booked!', 'brought_to_you_by_Checkfront!', 'generic_Taunt!', 'zort_narf_poit_Egad!', 'you_are_not_Prepared!', 'ill_get_you_my_Pretty!', 'hiss_CamelNoise!', 'flee_Mortals!']
+
 starvation_Limit 				= 25
 starvation_Cost 				= 100
 hunger_Limit 					= 50
@@ -59,7 +61,6 @@ def index():
 def start():
 	data = bottle.request.json
 	rand = random.randint(0, 2)
-	taunts = ['0xA9FF33', '0xFFFFFF', '0xA28F3C']
 	taunt = taunts[rand]
 	return {
 		'name': name,
@@ -90,7 +91,6 @@ def main_logic(data):
 	print_heatmap(heatmap)
 
 	rand = random.randint(0, 2)
-	taunts = ['0xA9FF33', '0xFFFFFF', '0xA28F3C']
 	taunt = taunts[rand]
 
 	move = get_move(data, data['ourhead'], heatmap, graph)
