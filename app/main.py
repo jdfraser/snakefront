@@ -10,7 +10,6 @@ import pathfinding
 from heatmap import print_heatmap, gen_heatmap
 import util
 
-name = 'camel_Snake'
 snake_id = ''
 
 starvation_Limit 				= 25
@@ -21,7 +20,7 @@ preferred_Snek_Length_modifer 	= 2
 dominace_Length 				= 40
 idle_Cost_Limit 				= 100
 server_Port						= '8080'
-name 							= 'camel_snake'
+name 							= 'camel_Snake'
 
 if len(sys.argv) > 1:
 	starvation_Limit 				= int(sys.argv[1])   #25
