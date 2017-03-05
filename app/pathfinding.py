@@ -53,7 +53,7 @@ def cheapest_path(G, heatmap, head_pos, target_pos, data):
             "nextPos": head_pos,
             "cost": 9998
         }
-    height = len(heatmap[0])
+    height = data['height']
     path = nx.shortest_path(G, source =head_pos[0] * height + head_pos[1], target=target_pos[0] * height + target_pos[1], weight='weight')
     pos_of_next_move = [path[1] // height, path[1] % height]
     weight = 0

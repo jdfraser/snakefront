@@ -36,6 +36,8 @@ if len(sys.argv) > 1:
 	server_Port						= sys.argv[9] 		#8080
 	name 							= sys.argv[10] #camel_snake
 
+MAX_WIGGLE = 7
+
 # retrieve and parse data from REST API
 @bottle.route('/static/<path:path>')
 def static(path):
@@ -116,13 +118,12 @@ def get_move(data, head, heatmap, graph):
 	follow_move, follow_cost = follow(data, head, heatmap, graph)
 	print "follow", follow_cost, "idle", idle_cost, "food", food_cost
 
-	longestSnakeID = ''
 	longestSnakeLength = 0
 	for snake in data['snakes']:
 		if snake['id'] != snake_id and len(snake['coords']) > longestSnakeLength:
 			longestSnakeLength = len(snake['coords'])
-			longestSnakeID = snake['id']
 
+	# Worst case scenario: Go 1 square in a direction that doesn't immediately kill it
 	move = move_idle_dumb(data, head, heatmap, graph)
 	move_name = 'default'
 
@@ -141,16 +142,21 @@ def get_move(data, head, heatmap, graph):
 	elif (idle_cost < idle_Cost_Limit):
 		move = idle_move
 		move_name = 'idle'
+	else:
+		# Running out of options... find the longest path
+		with util.TimerPrint("Wiggle time"):
+			for dist in range(MAX_WIGGLE, 1, -1):
+				wiggle_move, wiggle_cost = wiggle(data, head, heatmap, graph, dist)
+				if wiggle_cost < 100:
+					move = wiggle_move
+					move_name = 'wiggle ' + str(dist)
+					break
 
 	print head, move, move_name
 	print "Recommend next move", move_name, get_direction_from_target_headpos(head, move), str(move)
 
 	return move
 
-
-# Running out of options... find the longest path
-
-# Worst case scenario: Go 1 square in a direction that doesn't immediately kill it
 
 def food(data, head, heatmap, graph):
 	move = [0, 0]
@@ -214,6 +220,17 @@ def follow(data, head, heatmap, graph):
 
 	return move, cost
 
+def wiggle(data, head, heatmap, graph, dist=5):
+	cost = 9000
+	move = head
+	for x in range(-dist, dist + 1):
+		for y in range(-dist, dist + 1):
+			if (abs(x) + abs(y)) == dist:
+				pathdata = pathfinding.cheapest_path(graph, heatmap, head, [head[0] + x, head[1] + y], data)
+				if pathdata['cost'] < cost:
+					cost = pathdata['cost']
+					move = pathdata['nextPos']
+	return move, cost
 
 def move_idle_dumb(data, head, heatmap, graph):
 	left_pathdata = pathfinding.cheapest_path(graph, heatmap, head, [max(0, head[0] - 1), head[1]], data)
