@@ -10,7 +10,6 @@ import pathfinding
 from heatmap import print_heatmap, gen_heatmap
 import util
 
-name = 'camel_Snake'
 snake_id = ''
 
 starvation_Limit 				= 25
@@ -19,10 +18,9 @@ hunger_Limit 					= 50
 hunger_Cost 					= 70
 preferred_Snek_Length_modifer 	= 0
 dominace_Length 				= 0
-follow_Cost_Limit 				= 200
 idle_Cost_Limit 				= 100
 server_Port						= '8080'
-name 							= 'camel_snake'
+name 							= 'camel_Snake'
 
 if len(sys.argv) > 1:
 	starvation_Limit 				= int(sys.argv[1])   #25
@@ -115,8 +113,7 @@ def get_move(data, head, heatmap, graph):
 
 	idle_move, idle_cost = idle(data, head, heatmap, graph)
 	food_move, food_cost = food(data, head, heatmap, graph)
-	follow_move, follow_cost = follow(data, head, heatmap, graph)
-	print "follow", follow_cost, "idle", idle_cost, "food", food_cost
+	print "idle", idle_cost, "food", food_cost
 
 	longestSnakeLength = 0
 	for snake in data['snakes']:
@@ -136,9 +133,6 @@ def get_move(data, head, heatmap, graph):
 	elif ((longestSnakeLength + preferred_Snek_Length_modifer) >= len(data['oursnake']['coords']) and food_cost < dominace_Length):
 		move = food_move
 		move_name = 'food-dominate'
-	elif(follow_cost < follow_Cost_Limit):
-		move = follow_move
-		move_name = 'follow'
 	elif (idle_cost < idle_Cost_Limit):
 		move = idle_move
 		move_name = 'idle'
@@ -186,29 +180,6 @@ def idle(data, head, heatmap, graph):
 
 	target = oursnake[-1]
 	if (target == head):
-		return util.bad_move()
-
-	pathdata = pathfinding.cheapest_path(graph, heatmap, head, target, data)
-	move = pathdata['nextPos']
-	cost = pathdata['cost']
-
-	if not util.is_valid_move(move, data):
-		return util.bad_move()
-
-	return move, cost
-
-
-# Follow other snakes' tails if we're right next to one
-def follow(data, head, heatmap, graph):
-	target = False
-
-	for snake in data['snakes']:
-		snake_tail = snake['coords'][-1]
-		if util.dist(head, snake_tail) == 1:
-			target = snake_tail
-
-	if not target:
-		# No tails nearby
 		return util.bad_move()
 
 	pathdata = pathfinding.cheapest_path(graph, heatmap, head, target, data)

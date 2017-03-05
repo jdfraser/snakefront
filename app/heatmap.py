@@ -8,7 +8,7 @@ def default_heatmap(width, height):
 	return heatmap
 
 def fractal_heat(state, data, width, height, head_x, head_y, neck_x, neck_y, depth, factor, food_found=0):
-	if depth <= 1: return food_found
+	if depth <= 0 or factor <= 0.4: return food_found
 	# This was a for x,y in [(0,1),(0,-1),(1,0),(-1,0)]:, but unrolling this was WAY faster
 	food_found = heat_direction(state, data, width, height, head_x    , head_y + 1, head_x, head_y, neck_x, neck_y, depth, factor, food_found)
 	food_found = heat_direction(state, data, width, height, head_x    , head_y - 1, head_x, head_y, neck_x, neck_y, depth, factor, food_found)
@@ -22,7 +22,7 @@ def heat_direction(state, data, width, height, new_head_x, new_head_y, head_x, h
 	if new_head_x < 0 or new_head_x >= width or new_head_y < 0 or new_head_y >= height:
 		return food_found # stay inside the map
 	if (new_head_x * 1000 + new_head_y) in state['food_cache']:
-		factor *= 2
+		factor *= 3
 		food_found += 1
 		state['food_cache'].remove(new_head_x * 1000 + new_head_y)
 	data[new_head_x][new_head_y] += factor
@@ -50,8 +50,6 @@ def gen_heatmap(requestdata, maxturns=9, use_rings=True):
 		snakes = copy.deepcopy(state['snakes'])
 		for snake in snakes:
 			coords = snake['coords']
-			snake_tail = coords[-1]
-			tail_is_safe = snake['health_points'] < 100
 			# Skip parsing OUR heat (we control that) and (because this gets exponetially expensive) limit to maxturns
 			food_found = 0
 			if turn <= maxturns:
@@ -70,12 +68,12 @@ def gen_heatmap(requestdata, maxturns=9, use_rings=True):
 			# Now parse the body
 			try:
 				# Remove tail components that will move by the time we reach them
-				for i in range(turn - food_found): coords.pop()
+				tails_to_remove = min(turn - food_found - 1, 0)
+
+				for i in range(tails_to_remove): coords.pop()
 			except IndexError: pass
 
 			for x,y in coords:
-				if [x, y] == snake_tail and tail_is_safe:
-					continue
 				heatmap[x][y] += 700
 		for x, col in enumerate(heatmap):
 			for y, heat in enumerate(col):
