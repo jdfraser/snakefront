@@ -2,6 +2,7 @@
 
 import networkx as nx
 import util
+import boxes
 
 
 # HOW TO USE:
@@ -14,8 +15,14 @@ import util
 # Heatmap is an array of the board, with higher values being less safe.
 # Headpos is the [column, row] of the snake head.
 
+
+def xy_to_node_id(x, y):
+    return (x-1)*y + y
+
+
 # RETURNS a networkx graph
 def graphify(HeatMap):
+
     height = len(HeatMap[0])
     width = len(HeatMap)
     g = nx.Graph()
@@ -53,15 +60,38 @@ def cheapest_path(G, heatmap, head_pos, target_pos, data):
             "nextPos": head_pos,
             "cost": 9998
         }
-    height = data['height']
+
+    box_size = boxes.get_size_of_box_containing_node(
+        G.copy(),
+        xy_to_node_id(
+            target_pos[0],
+            target_pos[1]
+        ),
+        500
+    )
+    print xy_to_node_id(
+            target_pos[0],
+            target_pos[1]
+        )
+    print(target_pos)
+    print(box_size)
+
+    height = len(heatmap[0])
     path = nx.shortest_path(G, source =head_pos[0] * height + head_pos[1], target=target_pos[0] * height + target_pos[1], weight='weight')
     pos_of_next_move = [path[1] // height, path[1] % height]
     weight = 0
     for i in range(1, len(path)):
         weight += heatmap[path[i] // height][path[i] % height]  # Get weight of move
-    return {
+
+    if box_size < int(len(data["oursnake"]["coords"])*1.3):
+        weight += 100
+
+    return_data = {
         "path": path,
         "length": len(path),
         "nextPos": pos_of_next_move,
-        "cost": weight
+        "cost": weight,
+        "box_size": box_size
     }
+    print "cheapest_path return: ", return_data
+    return return_data

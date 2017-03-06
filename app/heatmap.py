@@ -68,7 +68,7 @@ def gen_heatmap(requestdata, maxturns=9, use_rings=True):
 			# Now parse the body
 			try:
 				# Remove tail components that will move by the time we reach them
-				tails_to_remove = min(turn - food_found - 1, 0)
+				tails_to_remove = max(turn - food_found, 0)
 
 				for i in range(tails_to_remove): coords.pop()
 			except IndexError: pass
